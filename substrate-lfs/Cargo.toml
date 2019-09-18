@@ -1,0 +1,9 @@
+[package]
+name = "substrate-lfs"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+description = "Large File Storage for Substrate"
+edition = "2018"
+
+[dependencies]
+libp2p = "0.12.0"
