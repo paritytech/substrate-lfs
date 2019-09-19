@@ -5,6 +5,7 @@ rust:
   - nightly
 
 script:
+  - rustup target install wasm32-unknown-unknown
   - command -v wasm-gc || cargo install --git https://github.com/alexcrichton/wasm-gc --force
   - cargo build --verbose --workspace
   - cargo test --verbose --workspace
