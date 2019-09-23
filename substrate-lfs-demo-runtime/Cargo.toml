@@ -57,5 +57,3 @@ std = [
 	"substrate-session/std",
 	"lfs/std"
 ]
-# TODO: UUUUGHHH
-no_std = []
