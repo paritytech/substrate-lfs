@@ -87,7 +87,10 @@ decl_module! {
 			// As `pongs` are only accepted by authorities, we only run this code,
 			// if a valid local key is found, we could submit them with.
 			if let Some(key) = Self::authority_id() {
+				runtime_io::print_utf8(b"trigger offchain");
 				Self::offchain(&key);
+			} else {
+				runtime_io::print_utf8(b"Not authority");
 			}
 		}
 
@@ -132,7 +135,7 @@ impl<T: Trait> Module<T> {
 	}
 
 	fn ping(key: &T::AccountId, nonce: u8) {
-		// runtime_io::print_utf8(b"Received ping, sending pong");
+		runtime_io::print_utf8(b"Received ping, sending pong");
 		let call = Call::pong(nonce);
 		let _ = T::SubmitTransaction::sign_and_submit(call, key.clone().into());
 	}
