@@ -1,33 +1,45 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// A runtime module template with necessary imports
+/// A runtime module for SRML
 
-/// Feel free to remove or edit this file as needed.
-/// If you change the name of this file, make sure to update its references in runtime/src/lib.rs
-/// If you remove this file, you can remove those references
-
-
-/// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/srml/example/src/lib.rs
-
+use rstd::prelude::*;
+use app_crypto::RuntimeAppPublic;
 use support::{decl_module, decl_storage, decl_event, StorageValue, dispatch::Result};
-use system::ensure_signed;
+use system::{ensure_signed, ensure_root};
+use system::offchain::SubmitSignedTransaction;
+use codec::{Encode, Decode};
+
+pub const KEY_TYPE: app_crypto::KeyTypeId = app_crypto::KeyTypeId(*b"lfso");
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
-	// TODO: Add other types and constants required configure this module.
-
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+
+	/// A dispatchable call type. We need to define it for the offchain worker to 
+	/// reference the `pong` function it wants to call.
+	type Call: From<Call<Self>>;
+
+	/// Let's define the helper we use to create signed transactions with
+	type SubmitTransaction: SubmitSignedTransaction<Self, <Self as Trait>::Call>;
+
+	/// The local keytype
+	type KeyType: RuntimeAppPublic + From<Self::AccountId> + Into<Self::AccountId> + Clone;
+}
+
+#[derive(Encode, Decode)]
+/// Calls triggered to the offchain worker
+enum OffchainCall {
+	Ping(u8) // -> Expected to call back Pong(u8)
 }
 
 // This module's storage items.
 decl_storage! {
-	trait Store for Module<T: Trait> as SubstrateModuleTemplate {
-		// Just a dummy storage item.
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(something): Option<u32>;
+	trait Store for Module<T: Trait> as LFS {
+		/// our record of offchain calls triggered in this block
+		Ofc: Vec<OffchainCall>;
+		/// The current set of keys that may submit pongs
+		Authorities get(authorities): Vec<T::AccountId>;
 	}
 }
 
@@ -39,19 +51,57 @@ decl_module! {
 		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
-		// Just a dummy entry point.
-		// function that can be called by the external world as an extrinsics call
-		// takes a parameter of the type `AccountId`, stores it and emits an event
-		pub fn do_something(origin, something: u32) -> Result {
-			// TODO: You only need this if you want to check it was signed.
-			let who = ensure_signed(origin)?;
+		fn on_initialize(_now: T::BlockNumber) {
+			// clean offchain calls on every block start
+			<Self as Store>::Ofc::kill();
+		}
 
-			// TODO: Code to execute when something calls this.
-			// For example: the following line stores the passed in u32 in the storage
-			Something::put(something);
+		// The main entry point: send the ping to the offchain worker
+		pub fn send_ping(origin, nonce: u8) -> Result {
+			// Ensure we are charging the sender
+			let _who = ensure_signed(origin)?;
 
-			// here we are raising the Something event
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+			// Informing the offchain worker
+			<Self as Store>::Ofc::mutate(|v| v.push(OffchainCall::Ping(nonce)));
+
+			Ok(())
+		}
+
+		// The pong from the offchain worker
+		pub fn pong(origin, nonce: u8) -> Result {
+			let author = ensure_signed(origin)?;
+
+			// we would be reacting here, but at the moment, we only
+			// issue the `Ack`-Event to show it passed.
+			
+			if Self::is_authority(&author) {
+				Self::deposit_event(RawEvent::Ack(nonce, author));
+			}
+
+			Ok(())
+		}
+
+
+		// Runs after every block within the context and current state of said block.
+		fn offchain_worker(_now: T::BlockNumber) {
+			// As `pongs` are only accepted by authorities, we only run this code,
+			// if a valid local key is found, we could submit them with.
+			if let Some(key) = Self::authority_id() {
+				Self::offchain(&key);
+			}
+		}
+
+		// Simple authority management: add a new authority to the set of keys that
+		// are allowed to respond with `pong`.
+		pub fn add_authority(origin, who: T::AccountId) -> Result {
+			// In practice this should be a bit cleverer, but for this example it is enough
+			// that this is protected by a root-call (e.g. through governance like `sudo`).
+			let _me = ensure_root(origin)?;
+
+			if !Self::is_authority(&who){
+				<Authorities<T>>::mutate(|l| l.push(who));
+			}
+
 			Ok(())
 		}
 	}
@@ -59,12 +109,58 @@ decl_module! {
 
 decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
-		// Just a dummy event.
-		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		// To emit this event, we call the deposit funtion, from our runtime funtions
-		SomethingStored(u32, AccountId),
+		/// Triggered on a pong with the corresponding value
+		Ack(u8, AccountId),
 	}
 );
+
+
+
+// We've moved the  helper functions outside of the main decleration for briefety.
+impl<T: Trait> Module<T> {
+
+	/// The main entry point, called with account we are supposed to sign with
+	fn offchain(key: &T::AccountId) {
+		for e in <Self as Store>::Ofc::get() {
+			match e {
+				OffchainCall::Ping(nonce) => {
+					Self::ping(key, nonce)
+				}
+				// there would be potential other calls
+			}
+		}
+	}
+
+	fn ping(key: &T::AccountId, nonce: u8) {
+		// runtime_io::print_utf8(b"Received ping, sending pong");
+		let call = Call::pong(nonce);
+		let _ = T::SubmitTransaction::sign_and_submit(call, key.clone().into());
+	}
+
+	/// Helper that confirms whether the given `AccountId` can sign `pong` transactions
+	fn is_authority(who: &T::AccountId) -> bool {
+		Self::authorities().into_iter().find(|i| i == who).is_some()
+	}
+
+	/// Find a local `AccountId` we can sign with, that is allowed to `pong`
+	fn authority_id() -> Option<T::AccountId> {
+		// Find all local keys accessible to this app through the localised KeyType.
+		// Then go through all keys currently stored on chain and check them against
+		// the list of local keys until a match is found, otherwise return `None`.
+		let local_keys = T::KeyType::all().iter().map(
+				|i| (*i).clone().into()
+			).collect::<Vec<T::AccountId>>();
+
+		Self::authorities().into_iter().find_map(|authority| {
+			if local_keys.contains(&authority) {
+				Some(authority)
+			} else {
+				None
+			}
+		})
+	}
+}
+
 
 /// tests for this module
 #[cfg(test)]

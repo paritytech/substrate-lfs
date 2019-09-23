@@ -11,6 +11,7 @@ std = [
     'codec/std',
     'support/std',
     'system/std',
+    'app_crypto/std'
 ]
 
 [dependencies.serde]
@@ -33,6 +34,18 @@ rev = 'bbe90e31ed2fd71dc037fc385dae32584d2b1ce8'
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
 package = 'srml-system'
+rev = 'bbe90e31ed2fd71dc037fc385dae32584d2b1ce8'
+
+[dependencies.app_crypto]
+default_features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = "substrate-application-crypto"
+rev = 'bbe90e31ed2fd71dc037fc385dae32584d2b1ce8'
+
+[dependencies.rstd]
+default_features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sr-std'
 rev = 'bbe90e31ed2fd71dc037fc385dae32584d2b1ce8'
 
 [dev-dependencies.primitives]
