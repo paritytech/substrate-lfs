@@ -55,5 +55,3 @@ std = [
 	"offchain-primitives/std",
 	"substrate-session/std",
 ]
-# TODO: UUUUGHHH
-no_std = []
