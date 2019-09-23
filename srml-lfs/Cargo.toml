@@ -1,0 +1,51 @@
+[package]
+name = "srml-lfs"
+version = "0.1.0"
+authors = ["Anonymous"]
+edition = "2018"
+
+[features]
+default = ['std']
+std = [
+    'serde',
+    'codec/std',
+    'support/std',
+    'system/std',
+]
+
+[dependencies.serde]
+version = "1.0"
+optional = true
+
+[dependencies.codec]
+default-features = false
+features = ['derive']
+package = 'parity-scale-codec'
+version = '1.0.0'
+
+[dependencies.support]
+default_features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'srml-support'
+rev = '188480de4727f11bae126d706fc188b1435082dd'
+
+[dependencies.system]
+default_features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'srml-system'
+rev = '188480de4727f11bae126d706fc188b1435082dd'
+
+[dev-dependencies.primitives]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'substrate-primitives'
+rev = '188480de4727f11bae126d706fc188b1435082dd'
+
+[dev-dependencies.sr-primitives]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sr-primitives'
+rev = '188480de4727f11bae126d706fc188b1435082dd'
+
+[dev-dependencies.runtime-io]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sr-io'
+rev = '188480de4727f11bae126d706fc188b1435082dd'

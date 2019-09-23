@@ -3389,6 +3389,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "srml-lfs"
+version = "0.1.0"
+dependencies = [
+ "parity-scale-codec 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sr-io 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+ "sr-primitives 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+ "srml-support 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+ "srml-system 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+ "substrate-primitives 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+]
+
+[[package]]
 name = "srml-metadata"
 version = "2.0.0"
 source = "git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd#188480de4727f11bae126d706fc188b1435082dd"
@@ -4007,6 +4020,7 @@ dependencies = [
  "srml-executive 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
  "srml-grandpa 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
  "srml-indices 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
+ "srml-lfs 0.1.0",
  "srml-sudo 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
  "srml-support 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
  "srml-system 2.0.0 (git+https://github.com/paritytech/substrate?rev=188480de4727f11bae126d706fc188b1435082dd)",
