@@ -6,7 +6,7 @@ use futures::prelude::*;
 use substrate_client::LongestChain;
 use substrate_consensus_babe::{import_queue, start_babe, Config};
 use substrate_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
-use substrate_lfs_demo_runtime::{self, GenesisConfig, opaque::Block, RuntimeApi};
+use substrate_lfs_demo_runtime::{self, GenesisConfig, opaque::Block, RuntimeApi, lfs_crypto};
 use substrate_service::{error::{Error as ServiceError}, AbstractService, Configuration, ServiceBuilder};
 use substrate_transaction_pool::{self, txpool::{Pool as TransactionPool}};
 use substrate_inherents::InherentDataProviders;
@@ -83,6 +83,7 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 	let name = config.name.clone();
 	let disable_grandpa = config.disable_grandpa;
 	let force_authoring = config.force_authoring;
+	let dev_seed = config.dev_key_seed.clone();
 
 	let (builder, mut import_setup, inherent_data_providers, mut tasks_to_spawn) = new_full_start!(config);
 
@@ -105,6 +106,17 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 					.map_err(|_| ())
 			);
 		}
+	}
+
+	if let Some(seed) = dev_seed {
+		service
+			.keystore()
+			.write()
+			.insert_ephemeral_from_seed_by_type::<lfs_crypto::Pair>(
+				&seed,
+				lfs_crypto::KEY_TYPE,
+			)
+			.expect("Dev Seed always succeeds");
 	}
 
 	if is_authority {
