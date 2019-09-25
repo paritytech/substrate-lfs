@@ -27,7 +27,7 @@ pub trait Trait: system::Trait {
 	type KeyType: RuntimeAppPublic + From<Self::AccountId> + Into<Self::AccountId> + Clone;
 }
 
-#[derive(Encode, Decode, Debug)]
+#[derive(Encode, Decode, Debug, PartialEq)]
 /// Calls triggered to the offchain worker
 enum OffchainCall {
 	Ping(u8) // -> Expected to call back Pong(u8)
@@ -177,8 +177,11 @@ mod tests {
 	use system;
 	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup, Verify}, AnySignature, testing::Header};
 	use sr_primitives::generic::UncheckedExtrinsic as GenericUncheckedExtrinsic;
+	use app_crypto::RuntimePublic;
 	use sr_primitives::weights::Weight;
 	use sr_primitives::Perbill;
+	use primitives::testing::KeyStore;
+
 
 	type Index = u32;
 	type Signature = AnySignature;
@@ -221,7 +224,7 @@ mod tests {
 	impl system::Trait for Test {
 		type Origin = Origin;
 		type Call = Call;
-		type Index = u64;
+		type Index = Index;
 		type BlockNumber = u64;
 		type Hash = H256;
 		type Hashing = BlakeTwo256;
@@ -246,13 +249,13 @@ mod tests {
 
 
 	/// Lastly we also need to implement the CreateTransaction signer for the runtime
-	impl system::offchain::CreateTransaction<Test, UncheckedExtrinsic> for Test {
+	impl system::offchain::CreateTransaction<Test, UncheckedExtrinsic> for Call {
 		type Signature = Signature;
 
 		fn create_transaction<F: system::offchain::Signer<AccountId, Self::Signature>>(
-			call: Call,
-			account: AccountId,
-			index: Index,
+			_call: Call,
+			_account: AccountId,
+			_index: Index,
 		) -> Option<(Call, <UncheckedExtrinsic as sr_primitives::traits::Extrinsic>::SignaturePayload)> {
 			None
 		}
@@ -261,16 +264,22 @@ mod tests {
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
 	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
-		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+		let mut r: runtime_io::TestExternalities<Blake2Hasher> =
+			system::GenesisConfig::default().build_storage::<Test>().unwrap().into();
+		r.set_keystore(KeyStore::new());
+		r
+
 	}
 
 	#[test]
 	fn smoketest_of_ping() {
 		with_externalities(&mut new_test_ext(), || {
+
+			let pair = AccountId::generate_pair(KEY_TYPE, None);
 			
-			assert_ok!(LfsModule::ping(Origin::signed(1), 42));
-			assert_ok!(LfsModule::ping(Origin::signed(1), 8));
-			assert_eq!(<LfsModule as Store>::Ofc::get(), [OffchainCall::Ping(42), OffchainCall::Ping(8)]);
+			assert_ok!(LfsModule::send_ping(Origin::signed(pair.clone()), 42));
+			assert_ok!(LfsModule::send_ping(Origin::signed(pair), 8));
+			assert_eq!(<LfsModule as Store>::Ofc::get(), vec![OffchainCall::Ping(42), OffchainCall::Ping(8)]);
 		});
 	}
 }
