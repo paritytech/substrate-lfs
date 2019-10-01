@@ -15,7 +15,7 @@ exit-future = "0.1"
 parking_lot = "0.9.0"
 parity-scale-codec = "1.0.0"
 trie-root = "0.15.2"
-substrate-lfs-demo-runtime = { path = "../substrate-lfs-demo-runtime" }
+substrate-lfs-demo-runtime = { path = "./runtime" }
 sr-io = { git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8" }
 substrate-lfs = { path = "../substrate-lfs" }
 substrate-cli = { git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8" }
