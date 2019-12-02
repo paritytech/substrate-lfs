@@ -1,0 +1,30 @@
+[package]
+name = "palett-lfs"
+version = "0.1.0"
+authors = ["Anonymous"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0", optional = true }
+codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '1.0.0' }
+support = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-support', rev = 'fe07382' }
+system = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-system', rev = 'fe07382' }
+app_crypto = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = "sc-application-crypto", rev = 'fe07382' }
+rstd = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-std', rev = 'fe07382' }
+runtime-io = { package = "sp-io", git = "https://github.com/paritytech/substrate", rev = "fe07382", default_features = false }
+
+
+[dev-dependencies]
+primitives = { git = 'https://github.com/paritytech/substrate.git', package = 'sp-core', rev = 'fe07382'}
+sp-runtime = { git = 'https://github.com/paritytech/substrate.git', package = 'sp-runtime', rev = 'fe07382'}
+
+
+[features]
+default = ['std']
+std = [
+    'serde',
+    'codec/std',
+    'support/std',
+    'system/std',
+    'app_crypto/std'
+]

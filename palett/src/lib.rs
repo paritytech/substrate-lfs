@@ -175,11 +175,11 @@ mod tests {
 	use support::{impl_outer_origin, impl_outer_dispatch, assert_ok, parameter_types};
 	use system::offchain::TransactionSubmitter;
 	use system;
-	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup, Verify}, AnySignature, testing::Header};
-	use sr_primitives::generic::UncheckedExtrinsic as GenericUncheckedExtrinsic;
+	use sp_runtime::{traits::{BlakeTwo256, IdentityLookup, Verify}, AnySignature, testing::Header};
+	use sp_runtime::generic::UncheckedExtrinsic as GenericUncheckedExtrinsic;
 	use app_crypto::RuntimePublic;
-	use sr_primitives::weights::Weight;
-	use sr_primitives::Perbill;
+	use sp_runtime::weights::Weight;
+	use sp_runtime::Perbill;
 	use primitives::testing::KeyStore;
 
 
@@ -256,7 +256,7 @@ mod tests {
 			_call: Call,
 			_account: AccountId,
 			_index: Index,
-		) -> Option<(Call, <UncheckedExtrinsic as sr_primitives::traits::Extrinsic>::SignaturePayload)> {
+		) -> Option<(Call, <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload)> {
 			None
 		}
 	}
