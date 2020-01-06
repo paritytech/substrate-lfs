@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "client",
-    "palett",
+    "pallet",
     "demo",
 ]
 

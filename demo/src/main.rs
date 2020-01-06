@@ -12,10 +12,10 @@ pub use sc_cli::{VersionInfo, IntoExit, error};
 
 fn main() -> Result<(), cli::error::Error> {
 	let version = VersionInfo {
-		name: "Substrate Node",
+		name: "Substrate LFS Demo Node",
 		commit: env!("VERGEN_SHA_SHORT"),
 		version: env!("CARGO_PKG_VERSION"),
-		executable_name: "node-template",
+		executable_name: "lfs-demo",
 		author: "Anonymous",
 		description: "Template Node",
 		support_url: "support.anonymous.an",
