@@ -2,43 +2,40 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use sp_std::prelude::*;
-use sp_core::OpaqueMetadata;
-use sp_runtime::{
-	ApplyExtrinsicResult, transaction_validity::TransactionValidity, generic, create_runtime_str,
-	impl_opaque_keys, MultiSignature,
-};
-use sp_runtime::traits::{
-	self,
-	NumberFor, BlakeTwo256, Block as BlockT, StaticLookup, Verify, ConvertInto, IdentifyAccount,
-	SaturatedConversion,
-};
+use grandpa::fg_primitives;
+use grandpa::AuthorityList as GrandpaAuthorityList;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use grandpa::AuthorityList as GrandpaAuthorityList;
-use grandpa::fg_primitives;
-use sp_version::RuntimeVersion;
+use sp_core::OpaqueMetadata;
+use sp_runtime::traits::{
+	self, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor,
+	SaturatedConversion, StaticLookup, Verify,
+};
+use sp_runtime::{
+	create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
+	ApplyExtrinsicResult, MultiSignature,
+};
+use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
+use sp_version::RuntimeVersion;
 
 // A few exports that help ease life for downstream crates.
+pub use balances::Call as BalancesCall;
+pub use frame_support::{
+	construct_runtime, parameter_types, traits::Randomness, weights::Weight, StorageValue,
+};
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-pub use timestamp::Call as TimestampCall;
-pub use balances::Call as BalancesCall;
+pub use sp_runtime::{Perbill, Permill};
 use system::offchain::TransactionSubmitter;
-pub use sp_runtime::{Permill, Perbill};
-pub use frame_support::{
-	StorageValue, construct_runtime, parameter_types,
-	traits::Randomness,
-	weights::Weight,
-};
+pub use timestamp::Call as TimestampCall;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -243,16 +240,15 @@ impl template::Trait for Runtime {
 	type Event = Event;
 }
 
-type LfsTransactionSubmitter = TransactionSubmitter<pallet_lfs::ed25519::Public, Runtime, UncheckedExtrinsic>;
+type LfsTransactionSubmitter =
+	TransactionSubmitter<pallet_lfs::ed25519::Public, Runtime, UncheckedExtrinsic>;
 
-/// Setup 
+/// Setup
 impl pallet_lfs::Trait for Runtime {
 	type Event = Event;
 	type Call = Call;
 	type SubmitTransaction = LfsTransactionSubmitter;
-	
 }
-
 
 construct_runtime!(
 	pub enum Runtime where
@@ -292,7 +288,7 @@ pub type SignedExtra = (
 	system::CheckEra<Runtime>,
 	system::CheckNonce<Runtime>,
 	system::CheckWeight<Runtime>,
-	transaction_payment::ChargeTransactionPayment<Runtime>
+	transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
@@ -301,8 +297,8 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<Runtime, Block, system::ChainContext<Runtime>, Runtime, AllModules>;
-
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, system::ChainContext<Runtime>, Runtime, AllModules>;
 
 impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtime {
 	type Public = <Signature as traits::Verify>::Signer;
@@ -313,7 +309,10 @@ impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtim
 		public: Self::Public,
 		account: AccountId,
 		index: Index,
-	) -> Option<(Call, <UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload)> {
+	) -> Option<(
+		Call,
+		<UncheckedExtrinsic as traits::Extrinsic>::SignaturePayload,
+	)> {
 		// take the biggest period possible.
 		let period = BlockHashCount::get()
 			.checked_next_power_of_two()
@@ -330,7 +329,7 @@ impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtim
 			system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
 			system::CheckNonce::<Runtime>::from(index),
 			system::CheckWeight::<Runtime>::new(),
-			transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip)
+			transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 		);
 		let raw_payload = SignedPayload::new(call, extra).ok()?;
 		let signature = TSigner::sign(public, &raw_payload)?;

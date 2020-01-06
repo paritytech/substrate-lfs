@@ -1,14 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// A runtime module for SRML
-
-use rstd::prelude::*;
 use app_crypto::KeyTypeId;
-use support::{decl_module, decl_storage, decl_event, StorageValue, dispatch::DispatchResult};
-use system::{ensure_signed, ensure_root};
-use system::offchain::SubmitSignedTransaction;
+use codec::{Decode, Encode};
+/// A runtime module for SRML
+use rstd::prelude::*;
 use sp_runtime::traits::StaticLookup;
-use codec::{Encode, Decode};
+use support::{decl_event, decl_module, decl_storage, dispatch::DispatchResult, StorageValue};
+use system::offchain::SubmitSignedTransaction;
+use system::{ensure_root, ensure_signed};
 
 pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"lfs0");
 
@@ -24,13 +23,12 @@ pub mod ed25519 {
 	app_crypto!(ed25519, KEY_TYPE);
 }
 
-
 /// The module's configuration trait.
-pub trait Trait: system::Trait{
+pub trait Trait: system::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
-	/// A dispatchable call type. We need to define it for the offchain worker to 
+	/// A dispatchable call type. We need to define it for the offchain worker to
 	/// reference the `pong` function it wants to call.
 	type Call: From<Call<Self>>;
 
@@ -41,7 +39,7 @@ pub trait Trait: system::Trait{
 #[derive(Encode, Decode, Debug, PartialEq)]
 /// Calls triggered to the offchain worker
 enum OffchainCall {
-	Ping(u8) // -> Expected to call back Pong(u8)
+	Ping(u8), // -> Expected to call back Pong(u8)
 }
 
 // This module's storage items.
@@ -84,7 +82,7 @@ decl_module! {
 
 			// we would be reacting here, but at the moment, we only
 			// issue the `Ack`-Event to show it passed.
-			
+
 			if Self::is_authority(&author) {
 				Self::deposit_event(RawEvent::Ack(nonce, author));
 			}
@@ -124,7 +122,10 @@ decl_module! {
 }
 
 decl_event!(
-	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
+	pub enum Event<T>
+	where
+		AccountId = <T as system::Trait>::AccountId,
+	{
 		/// Triggered on a pong with the corresponding value
 		Ack(u8, AccountId),
 	}
@@ -132,7 +133,6 @@ decl_event!(
 
 // We've moved the  helper functions outside of the main decleration for briefety.
 impl<T: Trait> Module<T> {
-
 	/// The main entry point, called with account we are supposed to sign with
 	fn offchain() {
 		for e in <Self as Store>::Ofc::get() {
@@ -141,8 +141,7 @@ impl<T: Trait> Module<T> {
 					sp_io::misc::print_utf8(b"Received ping, sending pong");
 					let call = Call::pong(nonce);
 					let _ = T::SubmitTransaction::submit_signed(call);
-				}
-				// there would be potential other calls
+				} // there would be potential other calls
 			}
 		}
 	}
@@ -152,4 +151,3 @@ impl<T: Trait> Module<T> {
 		Self::authorities().into_iter().find(|i| i == who).is_some()
 	}
 }
-
