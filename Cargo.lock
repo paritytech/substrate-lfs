@@ -240,6 +240,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "base64"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b41b7ea54a0c9d92199de89e20e58d49f02f8e699814ef3fdf266f6f748d15c7"
+
+[[package]]
 name = "bindgen"
 version = "0.49.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3087,6 +3093,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "parking_lot"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
+dependencies = [
+ "lock_api 0.3.3",
+ "parking_lot_core 0.7.0",
+]
+
+[[package]]
 name = "parking_lot_core"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3127,6 +3143,20 @@ dependencies = [
  "redox_syscall",
  "rustc_version",
  "smallvec 0.6.13",
+ "winapi 0.3.8",
+]
+
+[[package]]
+name = "parking_lot_core"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
+dependencies = [
+ "cfg-if",
+ "cloudabi",
+ "libc",
+ "redox_syscall",
+ "smallvec 1.1.0",
  "winapi 0.3.8",
 ]
 
@@ -3625,7 +3655,7 @@ version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b25a18b1bf7387f0145e7f8324e700805aade3842dd3db2e74e4cdeb4677c09e"
 dependencies = [
- "base64",
+ "base64 0.10.1",
  "log",
  "ring",
  "sct",
@@ -4011,6 +4041,26 @@ name = "sc-lfs"
 version = "0.1.0"
 dependencies = [
  "libp2p",
+]
+
+[[package]]
+name = "sc-lfs-rpc"
+version = "0.1.0"
+dependencies = [
+ "jsonrpc-core",
+ "jsonrpc-core-client",
+ "jsonrpc-derive",
+ "sp-lfs-core",
+]
+
+[[package]]
+name = "sc-lfs-simple-cache"
+version = "0.1.0"
+dependencies = [
+ "base64 0.11.0",
+ "parking_lot 0.10.0",
+ "sp-lfs-cache",
+ "sp-lfs-core",
 ]
 
 [[package]]
@@ -4542,7 +4592,7 @@ version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bceb1a3a15232d013d9a3b7cac9e5ce8e2313f348f01d4bc1097e5e53aa07095"
 dependencies = [
- "base64",
+ "base64 0.10.1",
  "bytes 0.4.12",
  "flate2",
  "futures 0.1.29",
@@ -4810,6 +4860,22 @@ dependencies = [
  "sp-core",
  "sp-runtime",
  "strum",
+]
+
+[[package]]
+name = "sp-lfs-cache"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "sp-lfs-core",
+]
+
+[[package]]
+name = "sp-lfs-core"
+version = "0.1.0"
+dependencies = [
+ "parity-scale-codec",
+ "sp-std",
 ]
 
 [[package]]

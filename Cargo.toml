@@ -1,7 +1,18 @@
 [workspace]
 members = [
+    # primitives
+    "primitives/core",
+    "primitives/cache",
+
+    # client
+    "client/rpc",
+    "client/simple-cache",
     "client",
+
+    # frame pallet
     "pallet",
+
+    # demo implementation
     "demo",
 ]
 
