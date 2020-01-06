@@ -10,8 +10,13 @@ edition = "2018"
 path = "../../primitives/core"
 default-features = false
 
+[dependencies.sp-lfs-cache]
+path = "../../primitives/cache"
+default-features = false
+
 
 [dependencies]
 jsonrpc-core = "14.0.5"
 jsonrpc-core-client = "14.0.5"
 jsonrpc-derive = "14.0.5"
+parking_lot = "0.10.0"

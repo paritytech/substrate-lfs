@@ -27,9 +27,10 @@ impl<Key: LfsId> Cache<Key> for SimpleInMemoryCache<Key> {
 		self.inner.lock().get(&key).ok_or(()).map(|v| v.clone())
 	}
 
-	fn put(self, key: Key, data: Vec<u8>) -> Result<(), ()> {
-		self.inner.lock().insert(key, data);
-		Ok(())
+	fn store(self, data: &Vec<u8>) -> Result<Key, ()> {
+		let key = Key::for_data(data)?;
+		self.inner.lock().insert(key.clone(), data.to_vec());
+		Ok(key)
 	}
 }
 
@@ -70,9 +71,10 @@ where
 		fs::read(path).map_err(|_| ())
 	}
 
-	fn put(self, key: Key, data: Vec<u8>) -> Result<(), ()> {
+	fn store(self, data: &Vec<u8>) -> Result<Key, ()> {
+		let key = Key::for_data(data)?;
 		let path = self.make_local_path(&key);
-		fs::write(path, data).map_err(|_| ())
+		fs::write(path, data).map_err(|_| ()).map(|_| key)
 	}
 }
 

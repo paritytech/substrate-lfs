@@ -6,6 +6,6 @@ pub trait Cache<Key> {
 	fn exists(self, key: Key) -> Result<bool, ()>;
 	/// Fetch the data for `key`
 	fn get(self, key: Key) -> Result<Vec<u8>, ()>;
-	/// Fetch the data for `key`
-	fn put(self, key: Key, data: Vec<u8>) -> Result<(), ()>;
+	/// store data, retrieve key
+	fn store(self, data: &Vec<u8>) -> Result<Key, ()>;
 }

@@ -4050,6 +4050,8 @@ dependencies = [
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",
+ "parking_lot 0.10.0",
+ "sp-lfs-cache",
  "sp-lfs-core",
 ]
 
