@@ -1,6 +1,8 @@
 [workspace]
 members = [
-    "substrate-lfs",
-    "srml-lfs",
+    "client",
+    "pallet",
     "demo",
 ]
+
+default-members = ["demo"]

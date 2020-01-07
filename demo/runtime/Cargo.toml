@@ -1,61 +1,73 @@
 [package]
-name = "substrate-lfs-demo-runtime"
-version = "1.0.0"
+name = "lfs-demo-runtime"
+version = "2.0.0"
 authors = ["Anonymous"]
 edition = "2018"
 
+[dependencies.pallet-lfs]
+path = "../../pallet"
+default-features = false
+
 [dependencies]
-serde = { version = "1.0", optional = true, features = ["derive"] }
-safe-mix = { version = "1.0", default-features = false }
+aura = { version = "2.0.0", default-features = false, package = "pallet-aura", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+balances = { version = "2.0.0", default-features = false, package = "pallet-balances", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+frame-support = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+grandpa = { version = "2.0.0", default-features = false, package = "pallet-grandpa", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+indices = { version = "2.0.0", default-features = false, package = "pallet-indices", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+randomness-collective-flip = { version = "2.0.0", default-features = false, package = "pallet-randomness-collective-flip", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sudo = { version = "2.0.0", default-features = false, package = "pallet-sudo", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+system = { version = "2.0.0", default-features = false, package = "frame-system", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+timestamp = { version = "2.0.0", default-features = false, package = "pallet-timestamp", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+transaction-payment = { version = "2.0.0", default-features = false, package = "pallet-transaction-payment", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+
 codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
-app_crypto = { package = "substrate-application-crypto", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-rstd = { package = "sr-std", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-runtime-io = { package = "sr-io", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-version = { package = "sr-version", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-support = { package = "srml-support", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-primitives = { package = "substrate-primitives", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-substrate-session = { git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default-features = false }
-balances = { package = "srml-balances", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-babe = { package = "srml-babe", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default-features = false }
-babe-primitives = { package = "substrate-consensus-babe-primitives", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default-features = false }
-executive = { package = "srml-executive", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-indices = { package = "srml-indices", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-grandpa = { package = "srml-grandpa", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default-features = false }
-system = { package = "srml-system", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-timestamp = { package = "srml-timestamp", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-sudo = { package = "srml-sudo", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-sr-primitives = { git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-client = { package = "substrate-client", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default_features = false }
-offchain-primitives = { package = "substrate-offchain-primitives", git = "https://github.com/paritytech/substrate", rev = "bbe90e31ed2fd71dc037fc385dae32584d2b1ce8", default-features = false }
-lfs  = { package = "srml-lfs", path = "../../srml-lfs", default_features = false}
+frame-executive = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+safe-mix = { version = "1.0.0", default-features = false }
+serde = { version = "1.0.101", optional = true, features = ["derive"] }
+sp-api = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-block-builder = { git = "https://github.com/paritytech/substrate", rev = "da816e2", default-features = false}
+sp-consensus-aura = { version = "0.8", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-core = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-inherents = { git = "https://github.com/paritytech/substrate", rev = "da816e2", default-features = false}
+sp-io = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-offchain = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-runtime = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-session = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-std = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-transaction-pool = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
+sp-version = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "da816e2" }
 
 [build-dependencies]
-wasm-builder-runner = { package = "substrate-wasm-builder-runner", version = "1.0.2" }
+wasm-builder-runner = { version = "1.0.4", package = "substrate-wasm-builder-runner", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
 
 [features]
 default = ["std"]
 std = [
-	"codec/std",
-	"client/std",
-	"rstd/std",
-	"runtime-io/std",
-	"support/std",
+	"aura/std",
 	"balances/std",
-	"babe/std",
-	"babe-primitives/std",
-	"executive/std",
-	"indices/std",
+	"codec/std",
+	"frame-executive/std",
+	"frame-support/std",
 	"grandpa/std",
-	"primitives/std",
-	"sr-primitives/std",
+	"indices/std",
+	"randomness-collective-flip/std",
+	"safe-mix/std",
+	"serde",
+	"sp-api/std",
+	"sp-block-builder/std",
+	"sp-consensus-aura/std",
+	"sp-core/std",
+	"sp-inherents/std",
+	"sp-io/std",
+	"sp-offchain/std",
+	"sp-runtime/std",
+	"sp-session/std",
+	"sp-std/std",
+	"sp-transaction-pool/std",
+	"sp-version/std",
+	"sudo/std",
 	"system/std",
 	"timestamp/std",
-	"sudo/std",
-	"version/std",
-	"serde",
-	"safe-mix/std",
-	"offchain-primitives/std",
-	"substrate-session/std",
-	"lfs/std",
-	"app_crypto/std"
+	"transaction-payment/std",
+	"pallet-lfs/std",
 ]
