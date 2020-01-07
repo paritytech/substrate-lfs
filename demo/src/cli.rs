@@ -9,6 +9,7 @@ use futures::{
 use log::info;
 use sc_cli::{display_role, informant, parse_and_prepare, NoCustom, ParseAndPrepare};
 pub use sc_cli::{error, IntoExit, VersionInfo};
+use sc_lfs::config::{load_config as load_lfs_config, LfsConfig};
 use sc_service::{AbstractService, Configuration, Roles as ServiceRoles};
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::cell::RefCell;
@@ -21,12 +22,18 @@ where
 	T: Into<std::ffi::OsString> + Clone,
 	E: IntoExit,
 {
-	type Config<T> = Configuration<(), T>;
+	type Config<T> = Configuration<LfsConfig, T>;
 	match parse_and_prepare::<NoCustom, NoCustom, _>(&version, "substrate-node", args) {
 		ParseAndPrepare::Run(cmd) => cmd.run(
 			load_spec,
 			exit,
-			|exit, _cli_args, _custom_args, config: Config<_>| {
+			|exit, _cli_args, _custom_args, mut config: Config<_>| {
+				config.custom = load_lfs_config(
+					config
+						.in_chain_config_dir("lfs.toml")
+						.expect("We always have a path")
+						.as_path(),
+				)?;
 				info!("{}", version.name);
 				info!("  version {}", config.full_version());
 				info!("  by {}, 2017, 2018", version.author);

@@ -2,5 +2,8 @@
 
 pub mod lfs_id;
 
-#[cfg(features = "jsonrpc")]
+#[cfg(feature = "std")]
+pub mod config;
+
+#[cfg(feature = "jsonrpc")]
 pub mod rpc;

@@ -32,7 +32,7 @@ where
 	C: Cache<LfsId> + Sync + Send + Clone + 'static,
 {
 	fn get(&self, id: LfsId) -> Result<Vec<u8>> {
-		if let Lfsd::Raw(data) = id {
+		if let LfsId::Raw(data) = id {
 			return Ok(data);
 		}
 

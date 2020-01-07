@@ -11,10 +11,11 @@ publish = false
 name = "lfs-demo"
 path = "src/main.rs"
 
-
 [dependencies.lfs-demo-runtime]
 path = "./runtime"
 
+[dependencies.sc-lfs]
+path = "../client"
 
 [dependencies]
 futures = "0.3.1"

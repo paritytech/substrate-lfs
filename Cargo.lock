@@ -1888,6 +1888,7 @@ dependencies = [
  "sc-consensus-aura",
  "sc-executor",
  "sc-finality-grandpa",
+ "sc-lfs",
  "sc-network",
  "sc-service",
  "sc-transaction-pool",
@@ -4047,7 +4048,10 @@ dependencies = [
  "libp2p",
  "parity-scale-codec",
  "parking_lot 0.10.0",
+ "serde",
+ "sp-lfs-cache",
  "sp-lfs-core",
+ "toml",
 ]
 
 [[package]]

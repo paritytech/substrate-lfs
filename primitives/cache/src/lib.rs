@@ -1,7 +1,7 @@
 use sp_lfs_core::LfsId;
 
 /// Node-side caching interface
-pub trait Cache<Key> {
+pub trait Cache<Key: LfsId> {
 	/// this cache knows of `key`
 	fn exists(self, key: Key) -> Result<bool, ()>;
 	/// Fetch the data for `key`
