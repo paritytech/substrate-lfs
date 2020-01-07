@@ -5,7 +5,6 @@ members = [
     "primitives/cache",
 
     # client
-    "client/rpc",
     "client/simple-cache",
     "client",
 

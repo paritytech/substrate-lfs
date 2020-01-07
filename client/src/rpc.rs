@@ -2,10 +2,8 @@ use jsonrpc_core::types::error::Error as ApiError;
 use jsonrpc_core::Result;
 use jsonrpc_derive::rpc;
 
+use crate::lfs_id::LfsId;
 use sp_lfs_cache::Cache;
-use sp_lfs_core::LfsId;
-
-const LOCAL_STORAGE_PREFIX: &'static [u8; 3] = b"lfs";
 
 /// Substrate LFS RPC API
 #[rpc]
@@ -29,19 +27,22 @@ impl<C> LfsRpc<C> {
 	}
 }
 
-impl<C, Key> LfsApi<Key> for LfsRpc<C>
+impl<C> LfsApi<LfsId> for LfsRpc<C>
 where
-	C: Cache<Key> + Sync + Send + Clone + 'static,
-	Key: LfsId,
+	C: Cache<LfsId> + Sync + Send + Clone + 'static,
 {
-	fn get(&self, id: Key) -> Result<Vec<u8>> {
+	fn get(&self, id: LfsId) -> Result<Vec<u8>> {
+		if let Lfsd::Raw(data) = id {
+			return Ok(data);
+		}
+
 		self.cache
 			.clone() // FIXME: why do we have to clone here?
 			.get(id)
 			.map_err(|_| ApiError::invalid_params("Key not found"))
 	}
 
-	fn upload(&self, data: Vec<u8>) -> Result<Key> {
+	fn upload(&self, data: Vec<u8>) -> Result<LfsId> {
 		self.cache
 			.clone() // FIXME: why do we have to clone here?
 			.store(&data)

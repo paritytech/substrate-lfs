@@ -4041,21 +4041,12 @@ dependencies = [
 name = "sc-lfs"
 version = "0.1.0"
 dependencies = [
- "libp2p",
- "parity-scale-codec",
- "sc-lfs-rpc",
- "sp-lfs-core",
-]
-
-[[package]]
-name = "sc-lfs-rpc"
-version = "0.1.0"
-dependencies = [
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",
+ "libp2p",
+ "parity-scale-codec",
  "parking_lot 0.10.0",
- "sp-lfs-cache",
  "sp-lfs-core",
 ]
 

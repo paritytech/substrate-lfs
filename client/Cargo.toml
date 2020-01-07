@@ -5,12 +5,29 @@ authors = ["Parity Technologies <admin@parity.io>"]
 description = "Large File Storage for Substrate"
 edition = "2018"
 
-[dependencies.sc-lfs-rpc]
-path = "./rpc"
-
 [dependencies.sp-lfs-core]
 path = "../primitives/core"
 
 [dependencies]
 libp2p = "0.13.1"
+parking_lot = "0.10.0"
 codec = { package = "parity-scale-codec", version = "1.1.2" }
+
+# feature: jsonrpc
+jsonrpc-core = { version = "14.0.5", optional = true }
+jsonrpc-core-client = { version = "14.0.5", optional = true }
+jsonrpc-derive = { version = "14.0.5", optional = true }
+
+[features]
+default = ["std", "jsonrpc" ]
+
+std = [
+    "sp-lfs-core/std",
+    "codec/std",
+]
+
+jsonrpc = [
+    "jsonrpc-core",
+    "jsonrpc-core-client",
+    "jsonrpc-derive",
+]

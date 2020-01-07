@@ -37,8 +37,6 @@ pub use sp_runtime::{Perbill, Permill};
 use system::offchain::TransactionSubmitter;
 pub use timestamp::Call as TimestampCall;
 
-use codec::{Decode, Encode};
-
 /// An index to a block.
 pub type BlockNumber = u32;
 
