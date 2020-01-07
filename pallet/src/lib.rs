@@ -13,7 +13,7 @@ use support::{
 use system::offchain::SubmitSignedTransaction;
 use system::{ensure_root, ensure_signed};
 
-use sp_lfs_core::LfsId;
+use sp_lfs_core::LfsReference;
 
 pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"lfs0");
 
@@ -42,21 +42,18 @@ pub trait Trait: system::Trait {
 
 	/// Let's define the helper we use to create signed transactions with
 	type SubmitTransaction: SubmitSignedTransaction<Self, <Self as Trait>::OcwCall>;
-
-	/// The specific lfs reference type
-	type LfsId: LfsId;
 }
 
 #[derive(Encode, Decode)]
 /// Calls triggered to the offchain worker
-pub enum LfsOffchainEvent<T: Trait> {
+pub enum LfsOffchainEvent {
 	/// Represents a query issued
-	Query(T::LfsId),
+	Query(LfsReference),
 	/// Inform the Offchain Worker that the entry has been resolved
 	/// meaning, they probably do not want to waste resources responding again
-	Resolved(T::LfsId),
+	Resolved(LfsReference),
 	/// This entry has been dropped from the internal listing
-	Dropped(T::LfsId),
+	Dropped(LfsReference),
 }
 
 #[derive(Encode, Decode)]
@@ -86,11 +83,11 @@ enum LfsEntryState<T: Trait> {
 decl_storage! {
 	trait Store for Module<T: Trait> as LFS {
 		/// our record of offchain calls triggered in this block
-		OcwEvents get(ocw_events): Vec<LfsOffchainEvent<T>>;
+		OcwEvents get(ocw_events): Vec<LfsOffchainEvent>;
 		/// The current set of keys that may submit pongs
 		Authorities get(authorities): Vec<T::AccountId>;
 		/// The specific LFS entries and states
-		Entries: map T::LfsId => Option<LfsEntryState<T>>;
+		Entries: map LfsReference => Option<LfsEntryState<T>>;
 	}
 }
 
@@ -107,7 +104,7 @@ decl_module! {
 			<Self as Store>::OcwEvents::kill();
 		}
 		// Respond to an lfs entry query
-		pub fn respond(origin, key: T::LfsId) -> DispatchResult {
+		pub fn respond(origin, key: LfsReference) -> DispatchResult {
 			let author = ensure_signed(origin)?;
 			if !Self::is_authority(&author) {
 				// No known authority, ignore
@@ -205,7 +202,7 @@ decl_event!(
 impl<T: Trait> Module<T> {
 	/// query for an lfs entry
 	pub fn query(
-		key: T::LfsId,
+		key: LfsReference,
 		callback: (
 			<T as Trait>::Callback,
 			Option<<T::Lookup as StaticLookup>::Source>,
@@ -251,7 +248,7 @@ impl<T: Trait> Module<T> {
 	}
 
 	/// indicate that you are not using a previously resolved reference anymore
-	pub fn drop(key: T::LfsId) -> DispatchResult {
+	pub fn drop(key: LfsReference) -> DispatchResult {
 		if let Some(mut entry) = Entries::<T>::get(&key) {
 			if let LfsEntryState::Resolved {
 				ref mut ref_count, ..

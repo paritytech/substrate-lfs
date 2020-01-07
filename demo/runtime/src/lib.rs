@@ -39,21 +39,6 @@ pub use timestamp::Call as TimestampCall;
 
 use codec::{Decode, Encode};
 
-#[derive(Debug, Encode, Decode, Clone, Hash, Eq)]
-pub struct DummyLfsId(Vec<u8>);
-
-impl core::cmp::PartialEq for DummyLfsId {
-	fn eq(&self, other: &Self) -> bool {
-		self.0 == other.0
-	}
-}
-
-impl sp_lfs_core::LfsId for DummyLfsId {
-	fn for_data(data: &Vec<u8>) -> Result<Self, ()> {
-		Ok(Self(data.clone()))
-	}
-}
-
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -265,7 +250,6 @@ impl pallet_lfs::Trait for Runtime {
 	type Event = Event;
 	type OcwCall = Call;
 	type Callback = Call;
-	type LfsId = DummyLfsId;
 	type SubmitTransaction = LfsTransactionSubmitter;
 }
 

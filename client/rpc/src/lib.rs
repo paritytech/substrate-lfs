@@ -43,7 +43,7 @@ where
 
 	fn upload(&self, data: Vec<u8>) -> Result<Key> {
 		self.cache
-			.clone()  // FIXME: why do we have to clone here?
+			.clone() // FIXME: why do we have to clone here?
 			.store(&data)
 			.map_err(|_| ApiError::invalid_params("Data could not be stored"))
 	}

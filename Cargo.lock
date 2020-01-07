@@ -4042,6 +4042,9 @@ name = "sc-lfs"
 version = "0.1.0"
 dependencies = [
  "libp2p",
+ "parity-scale-codec",
+ "sc-lfs-rpc",
+ "sp-lfs-core",
 ]
 
 [[package]]

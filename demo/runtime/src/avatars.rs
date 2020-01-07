@@ -1,13 +1,8 @@
-/// A runtime module template with necessary imports
-
-/// Feel free to remove or edit this file as needed.
-/// If you change the name of this file, make sure to update its references in runtime/src/lib.rs
-/// If you remove this file, you can remove those references
-
-/// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
+/// A runtime module to manage Avatars per accounts, using `LfsReference`s
+///
 use frame_support::{decl_event, decl_module, decl_storage, dispatch};
 use pallet_lfs::{Module as LfsModule, Trait as LfsTrait};
+use sp_lfs_core::LfsReference;
 use sp_runtime::traits::StaticLookup;
 use system::ensure_signed;
 
@@ -19,13 +14,11 @@ pub trait Trait: system::Trait + LfsTrait {
 	type Callback: From<Call<Self>> + Into<<Self as LfsTrait>::Callback>;
 }
 
-pub type AvatarId<T> = <T as LfsTrait>::LfsId;
-
 // This module's storage items.
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
 		// We store the LfsId as the Avatar for any AccountId
-		Avatars get(fn avatars): map T::AccountId => Option<AvatarId<T>>;
+		Avatars get(fn avatars): map T::AccountId => Option<LfsReference>;
 		AvatarsChangeNonce get(fn nonce): map T::AccountId => Option<u32>;
 	}
 }
@@ -38,7 +31,7 @@ decl_module! {
 		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
-		pub fn request_to_change_avatar(origin, key: AvatarId<T>) -> dispatch::DispatchResult {
+		pub fn request_to_change_avatar(origin, key: LfsReference) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
 			let nonce = Self::nonce(&who).unwrap_or(0) + 1;
 			let call: <T as Trait>::Callback = Call::avatar_changed(nonce, key.clone()).into();
@@ -52,7 +45,7 @@ decl_module! {
 		}
 
 		// callback called once the LFS is confirmed
-		fn avatar_changed(origin, nonce: u32, key: AvatarId<T>) -> dispatch::DispatchResult {
+		fn avatar_changed(origin, nonce: u32, key: LfsReference) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
 			if Some(nonce) == Self::nonce(&who) {
 				if let Some(old_key) = Avatars::<T>::get(&who) {
