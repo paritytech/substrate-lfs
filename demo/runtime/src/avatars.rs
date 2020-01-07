@@ -7,23 +7,26 @@
 /// For more guidance on Substrate modules, see the example module
 /// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
 use frame_support::{decl_event, decl_module, decl_storage, dispatch};
+use pallet_lfs::{Module as LfsModule, Trait as LfsTrait};
+use sp_runtime::traits::StaticLookup;
 use system::ensure_signed;
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
-	// TODO: Add other types and constants required configure this module.
-
+pub trait Trait: system::Trait + LfsTrait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+	/// Generating callback
+	type Callback: From<Call<Self>> + Into<<Self as LfsTrait>::Callback>;
 }
+
+pub type AvatarId<T> = <T as LfsTrait>::LfsId;
 
 // This module's storage items.
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
-		// Just a dummy storage item.
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(fn something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(fn something): Option<u32>;
+		// We store the LfsId as the Avatar for any AccountId
+		Avatars get(fn avatars): map T::AccountId => Option<AvatarId<T>>;
+		AvatarsChangeNonce get(fn nonce): map T::AccountId => Option<u32>;
 	}
 }
 
@@ -35,19 +38,32 @@ decl_module! {
 		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
-		// Just a dummy entry point.
-		// function that can be called by the external world as an extrinsics call
-		// takes a parameter of the type `AccountId`, stores it and emits an event
-		pub fn do_something(origin, something: u32) -> dispatch::DispatchResult {
-			// TODO: You only need this if you want to check it was signed.
+		pub fn request_to_change_avatar(origin, key: AvatarId<T>) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
+			let nonce = Self::nonce(&who).unwrap_or(0) + 1;
+			let call: <T as Trait>::Callback = Call::avatar_changed(nonce, key.clone()).into();
 
-			// TODO: Code to execute when something calls this.
-			// For example: the following line stores the passed in u32 in the storage
-			Something::put(something);
+			// store first
+			AvatarsChangeNonce::<T>::insert(&who, nonce);
+			// this maybe fire directly, if the key is already known!
+			LfsModule::<T>::query(key, (call.into(), Some(<T::Lookup as StaticLookup>::unlookup(who))))?;
 
-			// here we are raising the Something event
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+			Ok(())
+		}
+
+		// callback called once the LFS is confirmed
+		fn avatar_changed(origin, nonce: u32, key: AvatarId<T>) -> dispatch::DispatchResult {
+			let who = ensure_signed(origin)?;
+			if Some(nonce) == Self::nonce(&who) {
+				if let Some(old_key) = Avatars::<T>::get(&who) {
+					// There was an entry stored, inform LFS to drop the reference (count)
+					let _ = LfsModule::<T>::drop(old_key);
+				}
+				// then overwrite the entry with the new value
+				Avatars::<T>::insert(&who, key);
+				// and inform the public, that the users avatar changed
+				Self::deposit_event(RawEvent::AvatarChanged(who))
+			}
 			Ok(())
 		}
 	}
@@ -58,10 +74,7 @@ decl_event!(
 	where
 		AccountId = <T as system::Trait>::AccountId,
 	{
-		// Just a dummy event.
-		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		// To emit this event, we call the deposit funtion, from our runtime funtions
-		SomethingStored(u32, AccountId),
+		AvatarChanged(AccountId),
 	}
 );
 

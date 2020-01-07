@@ -7,7 +7,9 @@ use sp_runtime::{
 	traits::{Dispatchable, StaticLookup},
 	DispatchError,
 };
-use support::{decl_event, decl_module, decl_storage, dispatch::DispatchResult, StorageValue};
+use support::{
+	decl_event, decl_module, decl_storage, dispatch::DispatchResult, Parameter, StorageValue,
+};
 use system::offchain::SubmitSignedTransaction;
 use system::{ensure_root, ensure_signed};
 
@@ -32,15 +34,14 @@ pub trait Trait: system::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 
-	/// A dispatchable call type. We need to define it for the offchain worker to
-	/// reference the `result` function it wants to call.
-	type Call: From<Call<Self>>;
+	/// Offchain Worker Call
+	type OcwCall: From<Call<Self>>;
 
 	/// The callback type to call
-	type Callback: Dispatchable<Origin = Self::Origin> + Codec + Eq;
+	type Callback: Parameter + Dispatchable<Origin = Self::Origin> + Codec + Eq;
 
 	/// Let's define the helper we use to create signed transactions with
-	type SubmitTransaction: SubmitSignedTransaction<Self, <Self as Trait>::Call>;
+	type SubmitTransaction: SubmitSignedTransaction<Self, <Self as Trait>::OcwCall>;
 
 	/// The specific lfs reference type
 	type LfsId: LfsId;
@@ -203,7 +204,7 @@ decl_event!(
 /// The inner functions other modules build upon
 impl<T: Trait> Module<T> {
 	/// query for an lfs entry
-	fn query(
+	pub fn query(
 		key: T::LfsId,
 		callback: (
 			<T as Trait>::Callback,
@@ -250,7 +251,7 @@ impl<T: Trait> Module<T> {
 	}
 
 	/// indicate that you are not using a previously resolved reference anymore
-	fn drop(key: T::LfsId) -> DispatchResult {
+	pub fn drop(key: T::LfsId) -> DispatchResult {
 		if let Some(mut entry) = Entries::<T>::get(&key) {
 			if let LfsEntryState::Resolved {
 				ref mut ref_count, ..
@@ -308,7 +309,7 @@ impl<T: Trait> Module<T> {
 		for e in <Self as Store>::OcwEvents::get() {
 			match e {
 				LfsOffchainEvent::Query(key) => {
-					sp_io::misc::print_utf8(b"Received ping, sending pong");
+					sp_io::misc::print_utf8(b"Received query, sending response");
 					let call = Call::respond(key);
 					let _ = T::SubmitTransaction::submit_signed(call);
 				}

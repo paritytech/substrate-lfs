@@ -37,6 +37,23 @@ pub use sp_runtime::{Perbill, Permill};
 use system::offchain::TransactionSubmitter;
 pub use timestamp::Call as TimestampCall;
 
+use codec::{Decode, Encode};
+
+#[derive(Debug, Encode, Decode, Clone, Hash, Eq)]
+pub struct DummyLfsId(Vec<u8>);
+
+impl core::cmp::PartialEq for DummyLfsId {
+	fn eq(&self, other: &Self) -> bool {
+		self.0 == other.0
+	}
+}
+
+impl sp_lfs_core::LfsId for DummyLfsId {
+	fn for_data(data: &Vec<u8>) -> Result<Self, ()> {
+		Ok(Self(data.clone()))
+	}
+}
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -63,8 +80,7 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-/// Used for the module template in `./template.rs`
-mod template;
+mod avatars;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -92,8 +108,8 @@ pub mod opaque {
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node-template"),
-	impl_name: create_runtime_str!("node-template"),
+	spec_name: create_runtime_str!("lfs-demo"),
+	impl_name: create_runtime_str!("lfs-demo"),
 	authoring_version: 1,
 	spec_version: 1,
 	impl_version: 1,
@@ -236,8 +252,9 @@ impl sudo::Trait for Runtime {
 }
 
 /// Used for the module template in `./template.rs`
-impl template::Trait for Runtime {
+impl avatars::Trait for Runtime {
 	type Event = Event;
+	type Callback = Call;
 }
 
 type LfsTransactionSubmitter =
@@ -246,7 +263,9 @@ type LfsTransactionSubmitter =
 /// Setup
 impl pallet_lfs::Trait for Runtime {
 	type Event = Event;
-	type Call = Call;
+	type OcwCall = Call;
+	type Callback = Call;
+	type LfsId = DummyLfsId;
 	type SubmitTransaction = LfsTransactionSubmitter;
 }
 
@@ -264,9 +283,8 @@ construct_runtime!(
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
-		// Used for the module template in `./template.rs`
 		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
-		TemplateModule: template::{Module, Call, Storage, Event<T>},
+		Avatars: avatars::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
 );

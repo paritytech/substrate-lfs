@@ -8,6 +8,10 @@ edition = "2018"
 path = "../../pallet"
 default-features = false
 
+[dependencies.sp-lfs-core]
+path = "../../primitives/core"
+default-features = false
+
 [dependencies]
 aura = { version = "2.0.0", default-features = false, package = "pallet-aura", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
 balances = { version = "2.0.0", default-features = false, package = "pallet-balances", git = "https://github.com/paritytech/substrate", rev = "da816e2" }
