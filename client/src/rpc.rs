@@ -38,7 +38,7 @@ where
 
 		self.cache
 			.clone() // FIXME: why do we have to clone here?
-			.get(id)
+			.get(&id)
 			.map_err(|_| ApiError::invalid_params("Key not found"))
 	}
 

@@ -10,9 +10,17 @@ pub enum CacheConfig {
 	None,
 	#[serde(alias = "memory")]
 	InMemory {},
+	#[serde(alias = "lru")]
+	LRU {
+		size: u32,
+	},
 	#[serde(alias = "simple")]
 	SimpleDiskCache {
 		path: Option<PathBuf>,
+	},
+	#[serde(alias = "multi")]
+	Multi {
+		providers: Vec<CacheConfig>,
 	},
 }
 
@@ -24,7 +32,14 @@ pub struct LfsConfig {
 
 impl core::default::Default for CacheConfig {
 	fn default() -> CacheConfig {
-		CacheConfig::None
+		CacheConfig::Multi {
+			providers: vec![
+				CacheConfig::LRU { size: 1024 },
+				CacheConfig::SimpleDiskCache {
+					path: Some(PathBuf::from("./lfs")),
+				},
+			],
+		}
 	}
 }
 
