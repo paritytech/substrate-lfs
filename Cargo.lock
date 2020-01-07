@@ -2846,8 +2846,8 @@ dependencies = [
  "frame-system",
  "parity-scale-codec",
  "serde",
- "sp-application-crypto",
  "sp-io",
+ "sp-lfs-core",
  "sp-runtime",
  "sp-std",
 ]
@@ -4877,6 +4877,7 @@ name = "sp-lfs-core"
 version = "0.1.0"
 dependencies = [
  "parity-scale-codec",
+ "sp-runtime",
  "sp-std",
 ]
 

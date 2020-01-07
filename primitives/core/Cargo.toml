@@ -7,11 +7,14 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "1.1.2" }
+codec = { default_features = false, package = "parity-scale-codec", version = "1.1.2" }
 sp-std = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "da816e2" }
+sp-runtime = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "da816e2" }
 
 [features]
 default = ["std"]
 std = [
-    "codec/std"
+    "codec/std",
+    "sp-std/std",
+    "sp-runtime/std",
 ]
