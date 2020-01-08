@@ -13,6 +13,9 @@ use sp_inherents::InherentDataProviders;
 use std::sync::Arc;
 use std::time::Duration;
 
+// LFS
+use sc_lfs::{config::LfsConfig, DefaultClient as LfsClient};
+
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
@@ -86,8 +89,8 @@ macro_rules! new_full_start {
 }
 
 /// Builds a new service for a full client.
-pub fn new_full<C: Send + Default + 'static>(
-	config: Configuration<C, GenesisConfig>,
+pub fn new_full(
+	config: Configuration<LfsConfig, GenesisConfig>,
 ) -> Result<impl AbstractService, ServiceError> {
 	let is_authority = config.roles.is_authority();
 	let force_authoring = config.force_authoring;
@@ -98,6 +101,20 @@ pub fn new_full<C: Send + Default + 'static>(
 	// and should run the same protocols authorities do, but it should
 	// never actively participate in any consensus process.
 	let participates_in_consensus = is_authority && !config.sentry_mode;
+
+	let lfs = LfsClient::from_config(&config.custom, |p| {
+		p.as_path()
+			.to_str()
+			.map(|s| {
+				config
+					.in_chain_config_dir(s)
+					.expect("Chain configuration directory is always defined.")
+			})
+			.ok_or(format!(
+				"Could not convert LFS configuration path '{:?}' into OS string",
+				p
+			))
+	})?;
 
 	let (builder, mut import_setup, inherent_data_providers) = new_full_start!(config);
 

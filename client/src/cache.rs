@@ -4,15 +4,18 @@ use sc_lfs_simple_cache::{LruCache, SimpleDiskCache};
 use sp_lfs_cache::FrontedCache;
 use std::path::PathBuf;
 
-pub fn from_config(
-	cfg: LfsConfig,
-	base_path: PathBuf,
-) -> Result<FrontedCache<LruCache<LfsId>, SimpleDiskCache>, String> {
+pub type ClientCache = FrontedCache<LruCache<LfsId>, SimpleDiskCache>;
+
+pub fn from_config<F>(cfg: &LfsConfig, path_reverter: F) -> Result<ClientCache, String>
+where
+	F: Fn(PathBuf) -> Result<PathBuf, String>,
+{
 	let path_buf = {
-		if cfg.cache.path.is_relative() {
-			base_path.clone().join(cfg.cache.path)
+		let path = cfg.cache.path.clone();
+		if path.is_relative() {
+			path_reverter(path)?
 		} else {
-			cfg.cache.path
+			path
 		}
 	};
 	let path = path_buf.as_path();
