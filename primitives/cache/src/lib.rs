@@ -13,6 +13,8 @@ pub trait Cache<Key: LfsId>: std::marker::Sized {
 		let key = Key::for_data(data)?;
 		self.insert(&key, data).map(|_| key)
 	}
+	// mark the following key to be okay to drop
+	fn drop(&self, key: &Key) -> Result<(), ()>;
 }
 
 pub struct FrontedCache<F, B>(F, B);
@@ -49,5 +51,9 @@ where
 	fn insert(&self, key: &Key, data: &Vec<u8>) -> Result<(), ()> {
 		let _ = self.0.insert(key, data);
 		self.1.insert(key, data)
+	}
+	fn drop(&self, key: &Key) -> Result<(), ()> {
+		let _ = self.0.drop(key);
+		self.1.drop(key)
 	}
 }

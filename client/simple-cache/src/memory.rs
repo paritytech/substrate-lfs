@@ -32,4 +32,8 @@ impl<Key: LfsId> Cache<Key> for InMemoryCache<Key> {
 			.ok_or(())
 			.map(|_| ())
 	}
+
+	fn drop(&self, key: &Key) -> Result<(), ()> {
+		self.inner.lock().remove(key).ok_or(()).map(|_| ())
+	}
 }

@@ -44,4 +44,9 @@ where
 		let path = self.make_local_path(key);
 		fs::write(path, data).map_err(|_| ())
 	}
+
+	fn drop(&self, key: &Key) -> Result<(), ()> {
+		let path = self.make_local_path(key);
+		fs::remove_file(path).map_err(|_| ())
+	}
 }

@@ -31,4 +31,8 @@ impl<Key: LfsId> sp_lfs_cache::Cache<Key> for Cache<Key> {
 			.ok_or(())
 			.map(|_| ())
 	}
+
+	fn drop(&self, key: &Key) -> Result<(), ()> {
+		self.inner.lock().pop(key).ok_or(()).map(|_| ())
+	}
 }
