@@ -2,6 +2,7 @@ use crate::config::LfsConfig;
 use crate::lfs_id::LfsId;
 use sc_lfs_simple_cache::{LruCache, SimpleDiskCache};
 use sp_lfs_cache::{shared::SharedCache, FrontedCache};
+use sp_runtime_interface::runtime_interface;
 use std::path::PathBuf;
 
 pub type ClientCache = SharedCache<FrontedCache<LruCache<LfsId>, SimpleDiskCache>>;
@@ -31,4 +32,13 @@ where
 		LruCache::<LfsId>::new(cfg.cache.mem_limit),
 		disk,
 	)))
+}
+
+#[runtime_interface]
+trait LfsCacheInterface {
+	/// Fetch the data for `key`
+	fn get(&self, key: &LfsId) -> Result<Vec<u8>, ()> {
+		self.cache.get(key)
+		// Err(())
+	}
 }

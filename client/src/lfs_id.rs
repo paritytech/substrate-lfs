@@ -1,6 +1,6 @@
+pub use sp_lfs_core::{LfsId as LfsIdT, LfsReference};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-pub use sp_lfs_core::{LfsId as LfsIdT, LfsReference};
 
 use codec::{Decode, Encode};
 
@@ -12,6 +12,10 @@ pub enum LfsId {
 	/// below a certain length (< 32 bytes), it doesn't make any sense to hash them
 	#[codec(index = "0")]
 	Raw(Vec<u8>),
+}
+
+impl sp_runtime_interface::pass_by::PassBy for LfsId {
+    type PassBy = sp_runtime_interface::pass_by::Codec<Self>;
 }
 
 impl core::cmp::PartialEq for LfsId {

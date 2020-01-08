@@ -4053,6 +4053,7 @@ dependencies = [
  "serde",
  "sp-lfs-cache",
  "sp-lfs-core",
+ "sp-runtime-interface",
  "toml",
 ]
 
