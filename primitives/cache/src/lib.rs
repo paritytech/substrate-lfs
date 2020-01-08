@@ -1,5 +1,8 @@
 use sp_lfs_core::LfsId;
 
+#[cfg(feature = "std")]
+pub mod shared;
+
 /// Node-side caching interface
 pub trait Cache<Key: LfsId>: std::marker::Sized {
 	/// this cache knows of `key`

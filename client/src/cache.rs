@@ -1,10 +1,10 @@
-use crate::config::{CacheConfig, LfsConfig};
+use crate::config::LfsConfig;
 use crate::lfs_id::LfsId;
 use sc_lfs_simple_cache::{LruCache, SimpleDiskCache};
-use sp_lfs_cache::FrontedCache;
+use sp_lfs_cache::{shared::SharedCache, FrontedCache};
 use std::path::PathBuf;
 
-pub type ClientCache = FrontedCache<LruCache<LfsId>, SimpleDiskCache>;
+pub type ClientCache = SharedCache<FrontedCache<LruCache<LfsId>, SimpleDiskCache>>;
 
 pub fn from_config<F>(cfg: &LfsConfig, path_reverter: F) -> Result<ClientCache, String>
 where
@@ -27,8 +27,8 @@ where
 
 	let disk = SimpleDiskCache::new(path_buf)?;
 
-	Ok(FrontedCache::new(
+	Ok(SharedCache::new(FrontedCache::new(
 		LruCache::<LfsId>::new(cfg.cache.mem_limit),
 		disk,
-	))
+	)))
 }

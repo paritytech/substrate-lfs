@@ -1,9 +1,12 @@
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 pub use sp_lfs_core::{LfsId as LfsIdT, LfsReference};
 
 use codec::{Decode, Encode};
 
 #[derive(Debug, Encode, Decode, Clone, Hash, Eq)]
 /// Our Large File System ID
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum LfsId {
 	/// Raw directly showing the data
 	/// below a certain length (< 32 bytes), it doesn't make any sense to hash them

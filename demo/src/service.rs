@@ -127,6 +127,12 @@ pub fn new_full(
 		.with_finality_proof_provider(|client, backend| {
 			Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, client)) as _)
 		})?
+		.with_rpc_extensions(|_client, _pool, _backend, _, _| {
+			use sc_lfs::rpc::LfsApi;
+			let mut io = jsonrpc_core::IoHandler::default();
+			io.extend_with(LfsApi::to_delegate(lfs.make_rpc()));
+			Ok(io)
+		})?
 		.build()?;
 
 	if participates_in_consensus {

@@ -25,4 +25,9 @@ impl DefaultClient {
 			cache: cache::from_config(cfg, converter)?,
 		})
 	}
+
+	#[cfg(feature = "jsonrpc")]
+	pub fn make_rpc(&self) -> rpc::LfsRpc<cache::ClientCache> {
+		rpc::LfsRpc::new(self.cache.clone())
+	}
 }
