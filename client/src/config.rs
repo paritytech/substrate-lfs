@@ -3,25 +3,15 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use toml;
 
-/// Our configuration for the cache
+const DEFAULT_MEM_LIMIT: usize = 1024;
+
+/// Configuration for the LFS cache
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "provider")]
-pub enum CacheConfig {
-	None,
-	#[serde(alias = "memory")]
-	InMemory {},
-	#[serde(alias = "lru")]
-	LRU {
-		size: u32,
-	},
-	#[serde(alias = "simple")]
-	SimpleDiskCache {
-		path: Option<PathBuf>,
-	},
-	#[serde(alias = "multi")]
-	Multi {
-		providers: Vec<CacheConfig>,
-	},
+pub struct CacheConfig {
+	/// Where to store data locally
+	pub(crate) path: PathBuf,
+	/// Memory cache
+	pub(crate) mem_limit: usize,
 }
 
 /// Our lfs configuration file
@@ -32,13 +22,9 @@ pub struct LfsConfig {
 
 impl core::default::Default for CacheConfig {
 	fn default() -> CacheConfig {
-		CacheConfig::Multi {
-			providers: vec![
-				CacheConfig::LRU { size: 1024 },
-				CacheConfig::SimpleDiskCache {
-					path: Some(PathBuf::from("./lfs")),
-				},
-			],
+		CacheConfig {
+			path: PathBuf::from("./lfs"),
+			mem_limit: DEFAULT_MEM_LIMIT,
 		}
 	}
 }

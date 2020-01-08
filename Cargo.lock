@@ -4048,6 +4048,7 @@ dependencies = [
  "libp2p",
  "parity-scale-codec",
  "parking_lot 0.10.0",
+ "sc-lfs-simple-cache",
  "serde",
  "sp-lfs-cache",
  "sp-lfs-core",

@@ -8,6 +8,9 @@ edition = "2018"
 [dependencies.sp-lfs-cache]
 path = "../primitives/cache"
 
+[dependencies.sc-lfs-simple-cache]
+path = "./simple-cache"
+
 [dependencies.sp-lfs-core]
 path = "../primitives/core"
 

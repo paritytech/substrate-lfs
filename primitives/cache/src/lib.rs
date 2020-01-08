@@ -15,48 +15,39 @@ pub trait Cache<Key: LfsId>: std::marker::Sized {
 	}
 }
 
-pub struct MultiCache<C>(Vec<C>);
+pub struct FrontedCache<F, B>(F, B);
 
-impl<C> MultiCache<C> {
-	fn new(providers: Vec<C>) -> Self {
-		MultiCache(providers)
+impl<F, B> FrontedCache<F, B> {
+	pub fn new(front: F, back: B) -> Self {
+		FrontedCache(front, back)
 	}
 }
 
-impl<Key, C> Cache<Key> for MultiCache<C>
+impl<Key, F, B> Cache<Key> for FrontedCache<F, B>
 where
 	Key: LfsId,
-	C: Cache<Key>,
+	F: Cache<Key>,
+	B: Cache<Key>,
 {
 	fn exists(&self, key: &Key) -> Result<bool, ()> {
-		Ok(self.0.iter().any(|p| p.exists(key).unwrap_or(false)))
+		if self.0.exists(key).unwrap_or(false) {
+			return Ok(true);
+		}
+		self.1.exists(key)
 	}
-	/// Fetch the data for `key`
-	fn get(&self, key: &Key) -> Result<Vec<u8>, ()> {
-		let mut prev: Vec<&C> = vec![];
-		self.0
-			.iter()
-			.find_map(|p| match p.get(key) {
-				Ok(d) => {
-					prev.iter().for_each(|i| {
-						let _ = i.insert(key, &d);
-					});
 
-					Some(d)
-				}
-				_ => {
-					prev.push(p);
-					None
-				}
-			})
-			.ok_or(())
+	fn get(&self, key: &Key) -> Result<Vec<u8>, ()> {
+		self.0.get(key).or_else(|_| match self.1.get(key) {
+			Ok(d) => {
+				let _ = self.0.insert(key, &d);
+				Ok(d)
+			}
+			Err(e) => Err(e),
+		})
 	}
-	// insert the data at `key`
+
 	fn insert(&self, key: &Key, data: &Vec<u8>) -> Result<(), ()> {
-		self.0
-			.iter()
-			.map(|p| p.insert(key, data))
-			.find_map(|r| r.ok())
-			.ok_or(())
+		let _ = self.0.insert(key, data);
+		self.1.insert(key, data)
 	}
 }
