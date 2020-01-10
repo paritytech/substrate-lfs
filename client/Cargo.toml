@@ -20,8 +20,8 @@ features = ["std"]
 libp2p = "0.13.1"
 parking_lot = "0.10.0"
 codec = { package = "parity-scale-codec", version = "1.1.2" }
-sp-runtime-interface = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "da816e2" }
-sp-externalities = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "da816e2" }
+sp-runtime-interface = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "05b596f1ac3e3187717a87b1616706fe7511abcc" }
+sp-externalities = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "05b596f1ac3e3187717a87b1616706fe7511abcc" }
 
 # std
 toml = { version = "0.5.5", optional = true }

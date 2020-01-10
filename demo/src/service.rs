@@ -150,7 +150,7 @@ pub fn new_full(
 		let can_author_with =
 			sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _, _>(
+		let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _>(
 			sc_consensus_aura::SlotDuration::get_or_compute(&*client)?,
 			client,
 			select_chain,
