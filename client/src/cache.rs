@@ -1,8 +1,10 @@
 use crate::config::LfsConfig;
 use crate::lfs_id::LfsId;
 use sc_lfs_simple_cache::{LruCache, SimpleDiskCache};
-use sp_lfs_cache::{shared::SharedCache, FrontedCache};
+use sp_externalities::decl_extension;
+use sp_lfs_cache::{shared::SharedCache, Cache, FrontedCache};
 use sp_runtime_interface::runtime_interface;
+use std::any::{Any, TypeId};
 use std::path::PathBuf;
 
 pub type ClientCache = SharedCache<FrontedCache<LruCache<LfsId>, SimpleDiskCache>>;
@@ -34,11 +36,20 @@ where
 	)))
 }
 
+decl_extension! {
+	pub struct LfsCache(ClientCache);
+}
+
 #[runtime_interface]
-trait LfsCacheInterface {
+pub trait LfsCacheInterface {
 	/// Fetch the data for `key`
-	fn get(&self, key: &LfsId) -> Result<Vec<u8>, ()> {
-		self.cache.get(key)
-		// Err(())
+	fn get(&mut self, key: &LfsId) -> Result<Vec<u8>, ()> {
+		match self
+			.extension_by_type_id(TypeId::of::<LfsCache>())
+			.map(|e| Any::downcast_mut::<LfsCache>(e))
+		{
+			Some(Some(cache)) => cache.0.get(key),
+			_ => Err(()),
+		}
 	}
 }

@@ -14,13 +14,14 @@ use std::sync::Arc;
 use std::time::Duration;
 
 // LFS
-use sc_lfs::{config::LfsConfig, DefaultClient as LfsClient};
+use sc_lfs::{cache::lfs_cache_interface, config::LfsConfig, DefaultClient as LfsClient};
 
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
 	lfs_demo_runtime::api::dispatch,
 	lfs_demo_runtime::native_version,
+	lfs_cache_interface::HostFunctions,
 );
 
 construct_simple_protocol! {
