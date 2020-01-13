@@ -8,8 +8,8 @@ edition = "2018"
 
 [dependencies]
 codec = { default_features = false, package = "parity-scale-codec", version = "1.1.2" }
-sp-std = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "05b596f1ac3e3187717a87b1616706fe7511abcc" }
-sp-runtime = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "05b596f1ac3e3187717a87b1616706fe7511abcc" }
+sp-std = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-runtime = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
 
 [features]
 default = ["std"]
