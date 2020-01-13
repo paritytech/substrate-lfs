@@ -4545,6 +4545,7 @@ dependencies = [
  "parking_lot 0.10.0",
  "sc-lfs-simple-cache",
  "serde",
+ "sp-core",
  "sp-externalities",
  "sp-lfs-cache",
  "sp-lfs-core",
