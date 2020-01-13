@@ -16,7 +16,7 @@ path = "./runtime"
 
 [dependencies.sc-lfs]
 path = "../client"
-features = ["std", "jsonrpc"]
+features = ["default", "unstable"]
 
 [dependencies]
 futures = "0.3.1"

@@ -328,6 +328,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "blake3"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8c90bf4a07dd0b816948d0915ba1b110e7ce54169797feb5b39d6139a0a81ca"
+dependencies = [
+ "arrayref",
+ "arrayvec 0.5.1",
+ "cc",
+ "cfg-if",
+ "constant_time_eq",
+]
+
+[[package]]
 name = "block-buffer"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4537,6 +4550,7 @@ dependencies = [
 name = "sc-lfs"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "jsonrpc-core",
  "jsonrpc-core-client",
  "jsonrpc-derive",

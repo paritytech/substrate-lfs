@@ -1,9 +1,12 @@
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::hashing::{blake2_256, keccak_256, sha2_256};
+use sp_core::hashing::{blake2_256, sha2_256, keccak_256};
 pub use sp_lfs_core::{LfsId as LfsIdT, LfsReference};
 
 use codec::{Decode, Encode};
+
+#[cfg(feature = "with-blake3")]
+use blake3;
 
 type Hash256 = [u8; 32];
 
@@ -18,11 +21,21 @@ pub enum LfsId {
 
 	#[codec(index = "10")]
 	Blake2(Hash256),
+	#[cfg(feature = "with-blake3")]
+	#[codec(index = "11")]
+	Blake3(Hash256),
+	#[codec(index = "20")]
 	Sha2(Hash256),
+	#[codec(index = "21")]
 	Sha3(Hash256),
 }
 
 impl LfsId {
+	#[cfg(feature = "with-blake3")]
+	pub fn default(data: &Vec<u8>) -> Self {
+		Self::blake3(data)
+	}
+	#[cfg(not(feature = "with-blake3"))]
 	pub fn default(data: &Vec<u8>) -> Self {
 		Self::blake2(data)
 	}
@@ -34,6 +47,10 @@ impl LfsId {
 	}
 	pub fn sha3(data: &Vec<u8>) -> Self {
 		LfsId::Sha3(keccak_256(data))
+	}
+	#[cfg(feature = "with-blake3")]
+	pub fn blake3(data: &Vec<u8>) -> Self {
+		LfsId::Blake3(*blake3::hash(data).as_bytes())
 	}
 }
 
@@ -48,6 +65,8 @@ impl core::cmp::PartialEq for LfsId {
 			(LfsId::Blake2(s), LfsId::Blake2(o)) => s == o,
 			(LfsId::Sha2(s), LfsId::Sha2(o)) => s == o,
 			(LfsId::Sha3(s), LfsId::Sha3(o)) => s == o,
+			#[cfg(feature = "with-blake3")]
+			(LfsId::Blake3(s), LfsId::Blake3(o)) => s == o,
 			_ => false,
 		}
 	}

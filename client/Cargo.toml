@@ -33,13 +33,18 @@ jsonrpc-core = { version = "14.0.5", optional = true }
 jsonrpc-core-client = { version = "14.0.5", optional = true }
 jsonrpc-derive = { version = "14.0.5", optional = true }
 
+# feature: with-blake3
+blake3 = { version = "0.1.0", optional = true }
+
 [features]
-default = ["std", "jsonrpc" ]
+default = ["std", "jsonrpc"]
+unstable = ["with-blake3"]
 
 std = [
     "sp-lfs-core/std",
     "sp-runtime-interface/std",
     "codec/std",
+    "blake3/std",
     "toml",
     "serde",
 ]
@@ -48,4 +53,8 @@ jsonrpc = [
     "jsonrpc-core",
     "jsonrpc-core-client",
     "jsonrpc-derive",
+]
+
+with-blake3 = [
+    "blake3"
 ]
