@@ -1,6 +1,6 @@
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
-use sp_core::hashing::{blake2_256, sha2_256, keccak_256};
+use sp_core::hashing::{blake2_256, keccak_256, sha2_256};
 pub use sp_lfs_core::{LfsId as LfsIdT, LfsReference};
 
 use codec::{Decode, Encode};
