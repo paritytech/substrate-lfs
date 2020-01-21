@@ -8,6 +8,10 @@ edition = "2018"
 path = "../primitives/core"
 default_features = false
 
+[dependencies.sp-lfs-cache]
+path = "../primitives/cache"
+default_features = false
+
 [dependencies]
 serde = { version = "1.0", optional = true }
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '1.1.2' }
@@ -27,5 +31,6 @@ std = [
     'rstd/std',
     'sp-io/std',
     'sp-runtime/std',
+    'sp-lfs-cache/std',
     'sp-lfs-core/std'
 ]

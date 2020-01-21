@@ -14,8 +14,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 // LFS
-use sc_lfs::{cache::lfs_cache_interface, config::LfsConfig, DefaultClient as LfsClient};
-
+use sc_lfs::{config::LfsConfig, lfs_cache_interface, DefaultClient as LfsClient};
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
@@ -128,6 +127,7 @@ pub fn new_full(
 		.with_finality_proof_provider(|client, backend| {
 			Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, client)) as _)
 		})?
+		.with_execution_extensions_factory(lfs.make_externalities_extension_factory())?
 		.with_rpc_extensions(|_client, _pool, _backend, _, _| {
 			use sc_lfs::rpc::LfsApi;
 			let mut io = jsonrpc_core::IoHandler::default();

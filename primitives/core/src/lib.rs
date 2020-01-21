@@ -9,7 +9,7 @@ pub type LfsReference = Vec<u8>;
 
 /// Represent a Large File System Reference
 pub trait LfsId:
-	Encode + EncodeLike + Debug + Decode + TryFrom<LfsReference> + Hash + Eq + Clone
+	Encode + EncodeLike + Debug + Decode + TryFrom<LfsReference> + Hash + Eq + Clone + Sync + Send
 {
 	/// Generate the LfsId for the given data
 	fn for_data(data: &Vec<u8>) -> Result<Self, ()>;

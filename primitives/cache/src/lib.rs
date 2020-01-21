@@ -1,10 +1,14 @@
-use sp_lfs_core::LfsId;
+#![cfg_attr(not(feature = "std"), no_std)]
+
+use sp_externalities::{decl_extension, ExternalitiesExt};
+use sp_lfs_core::{LfsId, LfsReference};
+use sp_runtime_interface::runtime_interface;
 
 #[cfg(feature = "std")]
 pub mod shared;
 
 /// Node-side caching interface
-pub trait Cache<Key: LfsId>: std::marker::Sized {
+pub trait Cache<Key: LfsId>: Send + Sync {
 	/// this cache knows of `key`
 	fn exists(&self, key: &Key) -> Result<bool, ()>;
 	/// Fetch the data for `key`
@@ -58,5 +62,81 @@ where
 	fn drop(&self, key: &Key) -> Result<(), ()> {
 		let _ = self.0.drop(key);
 		self.1.drop(key)
+	}
+}
+
+pub trait RuntimeCacheInterface: Send + Sync {
+	/// this cache knows of `key`
+	fn exists(&self, key: &LfsReference) -> Result<bool, ()>;
+	/// Fetch the data for `key`
+	fn get(&self, key: &LfsReference) -> Result<Vec<u8>, ()>;
+	// insert the data at `key`
+	fn insert(&self, key: &LfsReference, data: &Vec<u8>) -> Result<(), ()>;
+	// mark the following key to be okay to drop
+	fn drop(&self, key: &LfsReference) -> Result<(), ()>;
+}
+
+pub struct RuntimeCacheInterfaceWrapper<C, Key>(C, core::marker::PhantomData<Key>);
+
+impl<C, Key> core::convert::From<C> for RuntimeCacheInterfaceWrapper<C, Key>
+where
+	C: Cache<Key>,
+	Key: LfsId,
+{
+	fn from(cache: C) -> Self {
+		Self(cache, core::marker::PhantomData)
+	}
+}
+
+impl<C, Key> RuntimeCacheInterface for RuntimeCacheInterfaceWrapper<C, Key>
+where
+	C: Cache<Key>,
+	Key: LfsId,
+{
+	fn exists(&self, key: &LfsReference) -> Result<bool, ()> {
+		let k = Key::try_from(key.to_vec()).map_err(|_| ())?;
+		self.0.exists(&k)
+	}
+
+	fn get(&self, key: &LfsReference) -> Result<Vec<u8>, ()> {
+		let k = Key::try_from(key.to_vec()).map_err(|_| ())?;
+		self.0.get(&k)
+	}
+
+	fn insert(&self, key: &LfsReference, data: &Vec<u8>) -> Result<(), ()> {
+		let k = Key::try_from(key.to_vec()).map_err(|_| ())?;
+		self.0.insert(&k, data)
+	}
+
+	fn drop(&self, key: &LfsReference) -> Result<(), ()> {
+		let k = Key::try_from(key.to_vec()).map_err(|_| ())?;
+		self.0.drop(&k)
+	}
+}
+
+decl_extension! {
+	pub struct LfsCacheExt(Box<dyn RuntimeCacheInterface>);
+}
+
+impl LfsCacheExt {
+	pub fn new(cache: Box<dyn RuntimeCacheInterface>) -> Self {
+		LfsCacheExt(cache)
+	}
+}
+
+#[runtime_interface]
+pub trait LfsCacheInterface {
+	/// Fetch the data for `key`
+	fn get(&mut self, key: &LfsReference) -> Result<Vec<u8>, ()> {
+		self.extension::<LfsCacheExt>()
+			.expect("LFSCacheExtension must be present")
+			.0
+			.get(key)
+	}
+	fn exists(&mut self, key: &LfsReference) -> Result<bool, ()> {
+		self.extension::<LfsCacheExt>()
+			.expect("LFSCacheExtension must be present")
+			.0
+			.exists(key)
 	}
 }

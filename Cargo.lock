@@ -3287,6 +3287,7 @@ dependencies = [
  "parity-scale-codec",
  "serde",
  "sp-io",
+ "sp-lfs-cache",
  "sp-lfs-core",
  "sp-runtime",
  "sp-std",
@@ -4557,6 +4558,7 @@ dependencies = [
  "libp2p 0.13.2",
  "parity-scale-codec",
  "parking_lot 0.10.0",
+ "sc-client-api",
  "sc-lfs-simple-cache",
  "serde",
  "sp-core",
@@ -5401,8 +5403,9 @@ dependencies = [
 name = "sp-lfs-cache"
 version = "0.1.0"
 dependencies = [
- "async-std",
+ "sp-externalities",
  "sp-lfs-core",
+ "sp-runtime-interface",
 ]
 
 [[package]]

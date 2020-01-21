@@ -307,8 +307,16 @@ impl<T: Trait> Module<T> {
 			match e {
 				LfsOffchainEvent::Query(key) => {
 					sp_io::misc::print_utf8(b"Received query, sending response");
-					let call = Call::respond(key);
-					let _ = T::SubmitTransaction::submit_signed(call);
+					match sp_lfs_cache::lfs_cache_interface::exists(&key) {
+						Ok(true) => {
+							sp_io::misc::print_utf8(b"Found in local cache");
+							let call = Call::respond(key);
+							let _ = T::SubmitTransaction::submit_signed(call);
+						}
+						_ => {
+							sp_io::misc::print_utf8(b"Not found");
+						}
+					}
 				}
 				_ => {}
 			}
