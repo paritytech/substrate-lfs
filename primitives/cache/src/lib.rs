@@ -1,8 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-
-use sp_externalities::{decl_extension, ExternalitiesExt};
 use sp_lfs_core::{LfsId, LfsReference};
 use sp_runtime_interface::runtime_interface;
+use sp_std::prelude::*;
+
+#[cfg(feature = "std")]
+use sp_externalities::{decl_extension, ExternalitiesExt};
 
 #[cfg(feature = "std")]
 pub mod shared;
@@ -114,10 +116,12 @@ where
 	}
 }
 
+#[cfg(feature = "std")]
 decl_extension! {
 	pub struct LfsCacheExt(Box<dyn RuntimeCacheInterface>);
 }
 
+#[cfg(feature = "std")]
 impl LfsCacheExt {
 	pub fn new(cache: Box<dyn RuntimeCacheInterface>) -> Self {
 		LfsCacheExt(cache)

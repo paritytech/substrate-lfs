@@ -6,20 +6,20 @@ edition = "2018"
 
 [dependencies.sp-lfs-core]
 path = "../primitives/core"
-default_features = false
+default-features = false
 
 [dependencies.sp-lfs-cache]
 path = "../primitives/cache"
-default_features = false
+default-features = false
 
 [dependencies]
 serde = { version = "1.0", optional = true }
 codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '1.1.2' }
-support = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-support', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-system = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-system', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-rstd = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-std', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-io = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-runtime = { default_features = false, git = 'https://github.com/paritytech/substrate.git', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9"}
+support = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-support', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+system = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-system', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+rstd = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-std', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-io = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-runtime = { default-features = false, git = 'https://github.com/paritytech/substrate.git', rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9"}
 
 [features]
 default = ['std']
@@ -32,5 +32,5 @@ std = [
     'sp-io/std',
     'sp-runtime/std',
     'sp-lfs-cache/std',
-    'sp-lfs-core/std'
+    'sp-lfs-core/std',
 ]

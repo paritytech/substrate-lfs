@@ -4,12 +4,10 @@ version = "0.1.0"
 authors = ["Benjamin Kampmann <ben@gnunicorn.org>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-codec = { default_features = false, package = "parity-scale-codec", version = "1.1.2" }
-sp-std = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-runtime = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+codec = { default-features = false, package = "parity-scale-codec", version = "1.1.2" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-runtime = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
 
 [features]
 default = ["std"]

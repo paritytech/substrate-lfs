@@ -5406,6 +5406,7 @@ dependencies = [
  "sp-externalities",
  "sp-lfs-core",
  "sp-runtime-interface",
+ "sp-std",
 ]
 
 [[package]]

@@ -9,13 +9,16 @@ path = "../core"
 default-features = false
 
 [dependencies]
-sp-externalities = { default_features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-runtime-interface = { default_features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-externalities = { optional = true, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
 
 
 [features]
 default = ["std"]
 std = [
+    "sp-externalities",
+    "sp-std/std",
     "sp-runtime-interface/std",
     "sp-lfs-core/std",
 ]
