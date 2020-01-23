@@ -12,6 +12,8 @@ members = [
     "pallet",
 
     # demo implementation
+    "demo/runtime",
+    "demo/rpc-client",
     "demo",
 ]
 
