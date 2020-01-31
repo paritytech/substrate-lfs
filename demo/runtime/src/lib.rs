@@ -64,9 +64,9 @@ pub type Hash = sp_core::H256;
 pub type DigestItem = generic::DigestItem<Hash>;
 
 pub const LFS_APP_KEY_TYPE: sp_runtime::KeyTypeId = pallet_lfs::KEY_TYPE;
-pub type LfsAppKeyPublic = pallet_lfs::ed25519::Public;
+pub type LfsAppKeyPublic = pallet_lfs::sr25519::Public;
 #[cfg(feature = "std")]
-pub type LfsAppKeyPair = pallet_lfs::ed25519::Pair;
+pub type LfsAppKeyPair = pallet_lfs::sr25519::Pair;
 
 pub mod avatars;
 
@@ -328,7 +328,7 @@ impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtim
 			.saturated_into::<u64>()
 			// make sure we actually construct on top of the parent block.
 			.saturating_sub(1);
-		let tip = 1010;
+		let tip = 0;
 		let extra: SignedExtra = (
 			system::CheckVersion::<Runtime>::new(),
 			system::CheckGenesis::<Runtime>::new(),
