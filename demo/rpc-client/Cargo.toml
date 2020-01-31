@@ -12,14 +12,14 @@ jsonrpc-core-client = { version = "14.0.3", features = ["http", "ws"] }
 log = "0.4.8"
 lfs-demo-runtime = { version = "2.0.0", path = "../runtime" }
 parity-scale-codec = "1.1.2"
-frame-system = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-frame-support = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-storage = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-core = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-rpc = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sc-rpc = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-keyring = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-pallet-transaction-payment = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
+frame-system = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+frame-support = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-storage = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-core = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-rpc = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sc-rpc = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-keyring = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+pallet-transaction-payment = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 
 sc-lfs = { path = "../../client", features = ["default", "unstable"] }

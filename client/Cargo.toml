@@ -20,10 +20,10 @@ features = ["std"]
 libp2p = "0.13.1"
 parking_lot = "0.10.0"
 codec = { default-features = false, package = "parity-scale-codec", version = "1.1.2" }
-sc-client-api = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-externalities = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
-sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
+sc-client-api = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-externalities = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-core = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 
 # std
 toml = { version = "0.5.5", optional = true }
