@@ -96,6 +96,7 @@ pub fn new_full(
 	let force_authoring = config.force_authoring;
 	let name = config.name.clone();
 	let disable_grandpa = config.disable_grandpa;
+	let dev_seed = config.dev_key_seed.clone();
 
 	// sentry nodes announce themselves as authorities to the network
 	// and should run the same protocols authorities do, but it should
@@ -185,6 +186,17 @@ pub fn new_full(
 		keystore,
 		is_authority,
 	};
+
+	if let Some(seed) = dev_seed {
+		service
+			.keystore()
+			.write()
+			.insert_ephemeral_from_seed_by_type::<lfs_demo_runtime::LfsAppKeyPair>(
+				&seed,
+				lfs_demo_runtime::LFS_APP_KEY_TYPE,
+			)
+			.expect("Dev Seed always succeeds");
+	}
 
 	match (is_authority, disable_grandpa) {
 		(false, false) => {

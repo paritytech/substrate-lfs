@@ -83,9 +83,9 @@ enum LfsEntryState<T: Trait> {
 decl_storage! {
 	trait Store for Module<T: Trait> as LFS {
 		/// our record of offchain calls triggered in this block
-		OcwEvents get(ocw_events): Vec<LfsOffchainEvent>;
+		OcwEvents get(fn ocw_events): Vec<LfsOffchainEvent>;
 		/// The current set of keys that may submit pongs
-		Authorities get(authorities): Vec<T::AccountId>;
+		Authorities get(fn authorities) config(): Vec<T::AccountId>;
 		/// The specific LFS entries and states
 		Entries: map LfsReference => Option<LfsEntryState<T>>;
 	}

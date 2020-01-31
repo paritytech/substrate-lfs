@@ -46,7 +46,7 @@ fn main() {
 
 	rt::run(rt::lazy(|| {
 		let uri = "http://localhost:9933";
-		let key = AccountKeyring::Alice;
+		let key = AccountKeyring::Bob;
 
 		http::connect(uri)
 			.and_then(|channel: RpcChannel| {
@@ -54,7 +54,10 @@ fn main() {
 				let client = LfsClient::<LfsId>::new(channel.clone());
 				client
 					.upload(include_bytes!("./avataaars.png").to_vec())
-					.map(|r| (channel, r))
+					.map(|r| {
+						println!("File uploaded via RPC: {:?}", r);
+						(channel, r)
+					})
 			})
 			.map(move |(channel, remote_id)| {
 				// get the current nonce via RPC
@@ -125,8 +128,8 @@ fn main() {
 					.map_err(|e| {
 						println!("Error: {:?}", e);
 					})
-					.map(|_| {
-						println!("Transaction submitted!");
+					.map(|hash| {
+						println!("Transaction submitted: {:}", hash);
 					});
 			})
 			.map_err(|e| {

@@ -63,6 +63,11 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
+pub const LFS_APP_KEY_TYPE: sp_runtime::KeyTypeId = pallet_lfs::KEY_TYPE;
+pub type LfsAppKeyPublic = pallet_lfs::ed25519::Public;
+#[cfg(feature = "std")]
+pub type LfsAppKeyPair = pallet_lfs::ed25519::Pair;
+
 pub mod avatars;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -242,8 +247,7 @@ impl avatars::Trait for Runtime {
 	type Callback = Call;
 }
 
-type LfsTransactionSubmitter =
-	TransactionSubmitter<pallet_lfs::ed25519::Public, Runtime, UncheckedExtrinsic>;
+type LfsTransactionSubmitter = TransactionSubmitter<LfsAppKeyPublic, Runtime, UncheckedExtrinsic>;
 
 /// Setup
 impl pallet_lfs::Trait for Runtime {
@@ -324,7 +328,7 @@ impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtim
 			.saturated_into::<u64>()
 			// make sure we actually construct on top of the parent block.
 			.saturating_sub(1);
-		let tip = 0;
+		let tip = 1010;
 		let extra: SignedExtra = (
 			system::CheckVersion::<Runtime>::new(),
 			system::CheckGenesis::<Runtime>::new(),
