@@ -87,7 +87,7 @@ decl_storage! {
 		/// The current set of keys that may submit pongs
 		Authorities get(fn authorities) config(): Vec<T::AccountId>;
 		/// The specific LFS entries and states
-		Entries: map LfsReference => Option<LfsEntryState<T>>;
+		Entries: map hasher(blake2_256) LfsReference => Option<LfsEntryState<T>>;
 	}
 }
 

@@ -9,9 +9,9 @@ path = "../core"
 default-features = false
 
 [dependencies]
-sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-externalities = { optional = true, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
-sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "d63ff7b9ac8d766b87a7a2cd99d5d73a521f97a9" }
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
+sp-externalities = { optional = true, git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
+sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "3d108eaf57266e9c922c1cd159186bbd35c7d441" }
 
 
 [features]
