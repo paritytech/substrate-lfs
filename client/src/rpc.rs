@@ -5,6 +5,8 @@ use jsonrpc_derive::rpc;
 use crate::lfs_id::LfsId;
 use sp_lfs_cache::Cache;
 
+pub use self::gen_client::Client as LfsClient;
+
 /// Substrate LFS RPC API
 #[rpc]
 pub trait LfsApi<Key> {

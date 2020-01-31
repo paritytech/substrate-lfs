@@ -21,48 +21,116 @@
 //! This module shows how you can write a Rust RPC client that connects to a running
 //! substrate node and use staticly typed RPC wrappers.
 
+use frame_support::storage::generator::StorageMap;
 use futures::Future;
 use hyper::rt;
-use jsonrpc_core_client::{transports::http, RpcError};
-use lfs_demo_runtime::Hash;
-use sc_rpc::author::{hash::ExtrinsicOrHash, AuthorClient};
+use jsonrpc_core_client::{transports::http, RpcChannel};
+use lfs_demo_runtime::{
+	avatars, BlockNumber as Number, Hash, Header, Runtime, Signature, SignedBlock, SignedExtra,
+	SignedPayload, UncheckedExtrinsic, VERSION,
+};
+use parity_scale_codec::{Decode, Encode};
+use sc_lfs::{lfs_id::LfsId, rpc::LfsClient};
+use sc_rpc::{author::AuthorClient, chain::ChainClient, state::StateClient};
+use sp_core::crypto::Pair;
+use sp_keyring::AccountKeyring;
+use sp_rpc::{list::ListOrValue, number::NumberOrHex};
+use sp_runtime::{
+	generic::Era,
+	traits::{IdentifyAccount, Verify},
+};
+use sp_storage::{StorageData, StorageKey};
 
 fn main() {
 	env_logger::init();
 
 	rt::run(rt::lazy(|| {
 		let uri = "http://localhost:9933";
+		let key = AccountKeyring::Alice;
 
 		http::connect(uri)
-			.and_then(|client: AuthorClient<Hash, Hash>| remove_all_extrinsics(client))
+			.and_then(|channel: RpcChannel| {
+				// let's upload the image via RPC
+				let client = LfsClient::<LfsId>::new(channel.clone());
+				client
+					.upload(include_bytes!("./avataaars.png").to_vec())
+					.map(|r| (channel, r))
+			})
+			.map(move |(channel, remote_id)| {
+				// get the current nonce via RPC
+				let nonce_key = frame_system::AccountNonce::<Runtime>::storage_map_final_key(
+					key.clone().to_account_id(),
+				);
+				let nonce = <Runtime as frame_system::Trait>::Index::decode(
+					&mut &StateClient::<Hash>::new(channel.clone())
+						.storage(StorageKey(nonce_key), None)
+						.wait()
+						.expect("RPC doesn't fail")
+						.unwrap_or(StorageData(vec![0, 0, 0, 0]))
+						.0[..],
+				)
+				.expect("Nonce is always an Index");
+
+				let genesis_hash = {
+					if let ListOrValue::Value(Some(h)) =
+						ChainClient::<Number, Hash, Header, SignedBlock>::new(channel.clone())
+							.block_hash(Some(ListOrValue::Value(NumberOrHex::Number(0))))
+							.wait()
+							.expect("Genesis Block exists")
+					{
+						h
+					} else {
+						panic!("No genesis hash found on remote chain!");
+					}
+				};
+
+				(channel, remote_id, genesis_hash, nonce)
+			})
+			.map(move |(channel, remote_id, genesis_hash, nonce)| {
+				// submit the reference ID as our avatar entry
+				let call = avatars::Call::<Runtime>::request_to_change_avatar(remote_id.into());
+
+				let tip = 0;
+				let extra: SignedExtra = (
+					frame_system::CheckVersion::<Runtime>::new(),
+					frame_system::CheckGenesis::<Runtime>::new(),
+					frame_system::CheckEra::<Runtime>::from(Era::Immortal),
+					frame_system::CheckNonce::<Runtime>::from(nonce),
+					frame_system::CheckWeight::<Runtime>::new(),
+					pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+				);
+				let raw_payload = SignedPayload::from_raw(
+					call.into(),
+					extra,
+					(
+						VERSION.spec_version,
+						genesis_hash.clone(),
+						genesis_hash,
+						(),
+						(),
+						(),
+					), // additional extras
+				);
+				let signature = raw_payload.using_encoded(|payload| key.pair().sign(payload));
+				let (call, extra, _) = raw_payload.deconstruct();
+				let account = <Signature as Verify>::Signer::from(key.public()).into_account();
+
+				let extrinsic =
+					UncheckedExtrinsic::new_signed(call, account.into(), signature.into(), extra);
+
+				let client = AuthorClient::<Hash, Hash>::new(channel.clone());
+				let _ = client
+					.submit_extrinsic(extrinsic.encode().into())
+					.wait()
+					.map_err(|e| {
+						println!("Error: {:?}", e);
+					})
+					.map(|_| {
+						println!("Transaction submitted!");
+					});
+			})
 			.map_err(|e| {
 				println!("Error: {:?}", e);
 			})
 	}))
-}
-
-/// Remove all pending extrinsics from the node.
-///
-/// The example code takes `AuthorClient` and first:
-/// 1. Calls the `pending_extrinsics` method to get all extrinsics in the pool.
-/// 2. Then calls `remove_extrinsic` passing the obtained raw extrinsics.
-///
-/// As the resul of running the code the entire content of the transaction pool is going
-/// to be removed and the extrinsics are going to be temporarily banned.
-fn remove_all_extrinsics(
-	client: AuthorClient<Hash, Hash>,
-) -> impl Future<Item = (), Error = RpcError> {
-	client
-		.pending_extrinsics()
-		.and_then(move |pending| {
-			client.remove_extrinsic(
-				pending
-					.into_iter()
-					.map(|tx| ExtrinsicOrHash::Extrinsic(tx.into()))
-					.collect(),
-			)
-		})
-		.map(|removed| {
-			println!("Removed extrinsics: {:?}", removed);
-		})
 }

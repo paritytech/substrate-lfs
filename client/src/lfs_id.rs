@@ -80,6 +80,11 @@ impl core::convert::TryFrom<LfsReference> for LfsId {
 			.map_err(|e| format!("Decoding LFS Reference failed: {:}", e))
 	}
 }
+impl core::convert::Into<LfsReference> for LfsId {
+	fn into(self) -> LfsReference {
+		self.encode()
+	}
+}
 
 impl LfsIdT for LfsId {
 	fn for_data(data: &Vec<u8>) -> Result<Self, ()> {
