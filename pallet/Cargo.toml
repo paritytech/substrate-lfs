@@ -4,15 +4,22 @@ version = "0.1.0"
 authors = ["Anonymous"]
 edition = "2018"
 
+[dependencies.sp-lfs-core]
+path = "../primitives/core"
+default-features = false
+
+[dependencies.sp-lfs-cache]
+path = "../primitives/cache"
+default-features = false
+
 [dependencies]
 serde = { version = "1.0", optional = true }
-codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '1.0.0' }
-support = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-support', rev  = "da816e2" }
-system = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-system', rev  = "da816e2" }
-app_crypto = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = "sp-application-crypto", rev  = "da816e2" }
-rstd = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-std', rev  = "da816e2" }
-sp-io = { default_features = false, git = "https://github.com/paritytech/substrate", rev  = "da816e2" }
-sp-runtime = { default_features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-runtime', rev  = "da816e2"}
+codec = { default-features = false, features = ['derive'], package = 'parity-scale-codec', version = '1.1.2' }
+support = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-support', rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+system = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'frame-system', rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+rstd = { default-features = false, git = 'https://github.com/paritytech/substrate.git', package = 'sp-std', rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-io = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-runtime = { default-features = false, git = 'https://github.com/paritytech/substrate.git', rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e"}
 
 [features]
 default = ['std']
@@ -21,8 +28,9 @@ std = [
     'codec/std',
     'support/std',
     'system/std',
-    'app_crypto/std',
     'rstd/std',
     'sp-io/std',
     'sp-runtime/std',
+    'sp-lfs-cache/std',
+    'sp-lfs-core/std',
 ]

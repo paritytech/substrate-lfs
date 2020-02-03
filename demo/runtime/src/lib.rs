@@ -14,8 +14,8 @@ use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::OpaqueMetadata;
 use sp_runtime::traits::{
-	self, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor,
-	SaturatedConversion, StaticLookup, Verify,
+	self, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, SaturatedConversion,
+	StaticLookup, Verify,
 };
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
@@ -63,8 +63,12 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-/// Used for the module template in `./template.rs`
-mod template;
+pub const LFS_APP_KEY_TYPE: sp_runtime::KeyTypeId = pallet_lfs::KEY_TYPE;
+pub type LfsAppKeyPublic = pallet_lfs::sr25519::Public;
+#[cfg(feature = "std")]
+pub type LfsAppKeyPair = pallet_lfs::sr25519::Pair;
+
+pub mod avatars;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -92,8 +96,8 @@ pub mod opaque {
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node-template"),
-	impl_name: create_runtime_str!("node-template"),
+	spec_name: create_runtime_str!("lfs-demo"),
+	impl_name: create_runtime_str!("lfs-demo"),
 	authoring_version: 1,
 	spec_version: 1,
 	impl_version: 1,
@@ -205,6 +209,8 @@ impl balances::Trait for Runtime {
 	type Balance = Balance;
 	/// What to do if an account's free balance gets zeroed.
 	type OnFreeBalanceZero = ();
+	/// What to do if an account is fully reaped from the system.
+	type OnReapAccount = System;
 	/// What to do if a new account is created.
 	type OnNewAccount = Indices;
 	/// The ubiquitous event type.
@@ -236,17 +242,18 @@ impl sudo::Trait for Runtime {
 }
 
 /// Used for the module template in `./template.rs`
-impl template::Trait for Runtime {
+impl avatars::Trait for Runtime {
 	type Event = Event;
+	type Callback = Call;
 }
 
-type LfsTransactionSubmitter =
-	TransactionSubmitter<pallet_lfs::ed25519::Public, Runtime, UncheckedExtrinsic>;
+type LfsTransactionSubmitter = TransactionSubmitter<LfsAppKeyPublic, Runtime, UncheckedExtrinsic>;
 
 /// Setup
 impl pallet_lfs::Trait for Runtime {
 	type Event = Event;
-	type Call = Call;
+	type OcwCall = Call;
+	type Callback = Call;
 	type SubmitTransaction = LfsTransactionSubmitter;
 }
 
@@ -264,9 +271,8 @@ construct_runtime!(
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
-		// Used for the module template in `./template.rs`
 		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
-		TemplateModule: template::{Module, Call, Storage, Event<T>},
+		Avatars: avatars::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
 );
@@ -392,8 +398,8 @@ impl_runtime_apis! {
 	}
 
 	impl sp_offchain::OffchainWorkerApi<Block> for Runtime {
-		fn offchain_worker(number: NumberFor<Block>) {
-			Executive::offchain_worker(number)
+		fn offchain_worker(header: &<Block as BlockT>::Header) {
+			Executive::offchain_worker(header)
 		}
 	}
 
@@ -410,6 +416,12 @@ impl_runtime_apis! {
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
 			opaque::SessionKeys::generate(seed)
+		}
+
+		fn decode_session_keys(
+			encoded: Vec<u8>,
+		) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
+			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
 		}
 	}
 

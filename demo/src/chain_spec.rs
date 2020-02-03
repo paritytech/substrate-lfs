@@ -152,3 +152,10 @@ fn testnet_genesis(
 		}),
 	}
 }
+
+pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
+	Ok(match Alternative::from(id) {
+		Some(spec) => Some(spec.load()?),
+		None => None,
+	})
+}

@@ -1,0 +1,24 @@
+[package]
+name = "sp-lfs-cache"
+version = "0.1.0"
+authors = ["Benjamin Kampmann <ben@gnunicorn.org>"]
+edition = "2018"
+
+[dependencies.sp-lfs-core]
+path = "../core"
+default-features = false
+
+[dependencies]
+sp-std = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-externalities = { optional = true, git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+
+
+[features]
+default = ["std"]
+std = [
+    "sp-externalities",
+    "sp-std/std",
+    "sp-runtime-interface/std",
+    "sp-lfs-core/std",
+]

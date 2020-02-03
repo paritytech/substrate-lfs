@@ -1,16 +1,15 @@
-//! Substrate Node Template CLI library.
-
+//! Substrate Node Demo Cli
 #![warn(missing_docs)]
-#![warn(unused_extern_crates)]
 
 mod chain_spec;
 #[macro_use]
 mod service;
 mod cli;
+mod command;
 
-pub use sc_cli::{error, IntoExit, VersionInfo};
+pub use sc_cli::{error, VersionInfo};
 
-fn main() -> Result<(), cli::error::Error> {
+fn main() -> Result<(), error::Error> {
 	let version = VersionInfo {
 		name: "Substrate LFS Demo Node",
 		commit: env!("VERGEN_SHA_SHORT"),
@@ -19,7 +18,8 @@ fn main() -> Result<(), cli::error::Error> {
 		author: "Anonymous",
 		description: "Template Node",
 		support_url: "support.anonymous.an",
+		copyright_start_year: 2019,
 	};
 
-	cli::run(std::env::args(), cli::Exit, version)
+	command::run(version)
 }
