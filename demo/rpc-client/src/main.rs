@@ -25,8 +25,9 @@ use frame_support::storage::generator::StorageMap;
 use futures::Future;
 use hyper::rt;
 use jsonrpc_core_client::{transports::http, RpcChannel};
+use pallet_lfs_avatars as avatars;
 use lfs_demo_runtime::{
-	avatars, BlockNumber as Number, Hash, Header, Runtime, Signature, SignedBlock, SignedExtra,
+	BlockNumber as Number, Hash, Header, Runtime, Signature, SignedBlock, SignedExtra,
 	SignedPayload, UncheckedExtrinsic, VERSION,
 };
 use parity_scale_codec::{Decode, Encode};

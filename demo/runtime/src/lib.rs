@@ -68,8 +68,6 @@ pub type LfsAppKeyPublic = pallet_lfs::sr25519::Public;
 #[cfg(feature = "std")]
 pub type LfsAppKeyPair = pallet_lfs::sr25519::Pair;
 
-pub mod avatars;
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -242,7 +240,7 @@ impl sudo::Trait for Runtime {
 }
 
 /// Used for the module template in `./template.rs`
-impl avatars::Trait for Runtime {
+impl pallet_lfs_avatars::Trait for Runtime {
 	type Event = Event;
 	type Callback = Call;
 }
@@ -272,7 +270,7 @@ construct_runtime!(
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
 		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
-		Avatars: avatars::{Module, Call, Storage, Event<T>},
+		Avatars: pallet_lfs_avatars::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
 );

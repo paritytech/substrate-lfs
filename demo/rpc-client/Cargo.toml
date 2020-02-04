@@ -22,4 +22,5 @@ sc-rpc = { version = "2.0.0", git = "https://github.com/paritytech/substrate", r
 sp-keyring = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 pallet-transaction-payment = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 
+pallet-lfs-avatars = { path = "../../pallets/avatars" }
 sc-lfs = { path = "../../client", features = ["default", "unstable"] }

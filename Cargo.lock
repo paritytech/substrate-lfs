@@ -2065,6 +2065,7 @@ dependencies = [
  "jsonrpc-core-client",
  "lfs-demo-runtime",
  "log 0.4.8",
+ "pallet-lfs-avatars",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "sc-lfs",
@@ -2088,6 +2089,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-indices",
  "pallet-lfs",
+ "pallet-lfs-avatars",
  "pallet-randomness-collective-flip",
  "pallet-sudo",
  "pallet-timestamp",
@@ -3511,6 +3513,18 @@ dependencies = [
  "sp-lfs-core",
  "sp-runtime",
  "sp-std",
+]
+
+[[package]]
+name = "pallet-lfs-avatars"
+version = "0.1.0"
+dependencies = [
+ "frame-support",
+ "frame-system",
+ "pallet-lfs",
+ "parity-scale-codec",
+ "sp-lfs-core",
+ "sp-runtime",
 ]
 
 [[package]]

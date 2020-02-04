@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Codec, Decode, Encode};
-use rstd::prelude::*;
+use sp_std::prelude::*;
 use sp_runtime::app_crypto::KeyTypeId;
 use sp_runtime::{
 	traits::{Dispatchable, StaticLookup},
