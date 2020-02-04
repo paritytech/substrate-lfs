@@ -240,9 +240,10 @@ impl sudo::Trait for Runtime {
 }
 
 /// Used for the module template in `./template.rs`
-impl pallet_lfs_avatars::Trait for Runtime {
+impl pallet_lfs_user_data::Trait for Runtime {
 	type Event = Event;
 	type Callback = Call;
+	type KeyGuard = pallet_lfs_user_data::guard::DefaultUserKeys;
 }
 
 type LfsTransactionSubmitter = TransactionSubmitter<LfsAppKeyPublic, Runtime, UncheckedExtrinsic>;
@@ -270,7 +271,7 @@ construct_runtime!(
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
 		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
-		Avatars: pallet_lfs_avatars::{Module, Call, Storage, Event<T>},
+		UserData: pallet_lfs_user_data::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
 );

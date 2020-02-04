@@ -25,11 +25,11 @@ use frame_support::storage::generator::StorageMap;
 use futures::Future;
 use hyper::rt;
 use jsonrpc_core_client::{transports::http, RpcChannel};
-use pallet_lfs_avatars as avatars;
 use lfs_demo_runtime::{
 	BlockNumber as Number, Hash, Header, Runtime, Signature, SignedBlock, SignedExtra,
 	SignedPayload, UncheckedExtrinsic, VERSION,
 };
+use pallet_lfs_user_data as user_data;
 use parity_scale_codec::{Decode, Encode};
 use sc_lfs::{lfs_id::LfsId, rpc::LfsClient};
 use sc_rpc::{author::AuthorClient, chain::ChainClient, state::StateClient};
@@ -92,7 +92,7 @@ fn main() {
 			})
 			.map(move |(channel, remote_id, genesis_hash, nonce)| {
 				// submit the reference ID as our avatar entry
-				let call = avatars::Call::<Runtime>::request_to_change_avatar(remote_id.into());
+				let call = user_data::Call::<Runtime>::update(b"avatar".to_vec(), remote_id.into());
 
 				let tip = 0;
 				let extra: SignedExtra = (

@@ -1,12 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Codec, Decode, Encode};
-use sp_std::prelude::*;
 use sp_runtime::app_crypto::KeyTypeId;
 use sp_runtime::{
 	traits::{Dispatchable, StaticLookup},
 	DispatchError,
 };
+use sp_std::prelude::*;
 use support::{
 	decl_event, decl_module, decl_storage, dispatch::DispatchResult, Parameter, StorageValue,
 };

@@ -11,7 +11,7 @@ members = [
     # frame core pallet
     "pallets",
     # custom frame palletts
-    "pallets/avatars",
+    "pallets/user-data",
 
     # demo implementation
     "demo/runtime",
