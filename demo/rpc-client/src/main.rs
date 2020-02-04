@@ -130,7 +130,7 @@ fn main() {
 						println!("Error: {:?}", e);
 					})
 					.map(|hash| {
-						println!("Transaction submitted: {:}", hash);
+						println!("Avatar {:?} submitted: {:}", b"avatar", hash);
 					});
 			})
 			.map_err(|e| {

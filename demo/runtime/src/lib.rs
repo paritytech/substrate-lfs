@@ -270,7 +270,7 @@ construct_runtime!(
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
-		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
+		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>, Config<T>},
 		UserData: pallet_lfs_user_data::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
