@@ -48,8 +48,8 @@ pub trait Trait: system::Trait + LfsTrait {
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
 		// We store the LfsId as the Avatar for any AccountId
-		UserData get(fn user_data): double_map hasher(blake2_256) T::AccountId, hasher(blake2_256) EntryKey => Option<LfsReference>;
-		UserDataChangeNonce get(fn nonce): double_map hasher(blake2_256) T::AccountId, hasher(blake2_256) EntryKey => Option<u32>;
+		UserData get(fn user_data): double_map hasher(twox_128) T::AccountId, hasher(blake2_256) EntryKey => Option<LfsReference>;
+		UserDataChangeNonce get(fn nonce): double_map hasher(twox_128) T::AccountId, hasher(blake2_256) EntryKey => Option<u32>;
 	}
 }
 
