@@ -8,8 +8,8 @@ members = [
     "client/simple-cache",
     "client",
 
-    # frame pallet
-    "pallet",
+    # frame pallets
+    "pallets",
 
     # demo implementation
     "demo/runtime",
