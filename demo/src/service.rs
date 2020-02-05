@@ -12,8 +12,6 @@ use sp_inherents::InherentDataProviders;
 use std::sync::Arc;
 use std::time::Duration;
 
-use crate::http_proxy;
-
 // LFS
 use sc_lfs::{
 	config::load_config as load_lfs_config, lfs_cache_interface, DefaultClient as LfsClient,
@@ -177,7 +175,10 @@ pub fn new_full(
 		service.spawn_essential_task("aura", aura);
 	}
 
-	service.spawn_task("http-server", http_proxy::start_server(lfs.cache().clone()));
+	service.spawn_task(
+		"http-server",
+		sc_lfs_http_server::start_server(lfs.cache().clone()),
+	);
 
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.

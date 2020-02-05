@@ -6,6 +6,7 @@ members = [
 
     # client
     "client/simple-cache",
+    "client/http-server",
     "client",
 
     # frame core pallet

@@ -18,11 +18,9 @@ path = "./runtime"
 path = "../client"
 features = ["default", "unstable"]
 
-[dependencies.sp-lfs-cache]
-path = "../primitives/cache"
-
-[dependencies.sp-lfs-core]
-path = "../primitives/core"
+[dependencies.sc-lfs-http-server]
+path = "../client/http-server"
+# features = ["default", "unstable"]
 
 
 [dependencies]
@@ -34,7 +32,6 @@ tokio = "0.1.22"
 parking_lot = "0.9.0"
 codec = { package = "parity-scale-codec", version = "1.0.0" }
 trie-root = "0.15.2"
-base64 = "0.11"
 sp-io = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sc-cli = { version = "0.8.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sp-core = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
@@ -52,8 +49,6 @@ grandpa-primitives = { version = "2.0.0", package = "sp-finality-grandpa", git =
 sc-client = { version = "0.8.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
-
-hyper = "0.13"
 
 structopt = "0.3.8"
 jsonrpc-core =  "14.0.5"

@@ -1,16 +1,36 @@
-use futures::future::{self, Future};
+use futures::future;
 use std::task::{Context, Poll};
-use std::pin::Pin;
-use std::convert::Infallible;
 use std::marker::PhantomData;
-use hyper::server::conn::AddrStream;
-use hyper::service::{Service, make_service_fn};
+use hyper::service::Service;
 use hyper::{http, Body, Request, Response, Server, StatusCode};
 // use sc_client::Client;
 use sp_lfs_cache::Cache;
-use sp_lfs_core::LfsId;
 
 pub struct HelloWorld<C, L>(C, PhantomData<L>);
+
+impl<C, LfsId> HelloWorld<C, LfsId>
+where
+	C: Cache<LfsId>,
+	LfsId: sp_lfs_core::LfsId,
+{
+	fn read_data(&self, key: LfsId) -> Option<Vec<u8>> {
+		self.0.get(&key).ok()
+	}
+
+	fn decode_to_key<'a>(&self, id: &'a str) -> Option<LfsId> {
+		base64::decode_config(id, base64::URL_SAFE)
+			.ok()
+			.map(|id| LfsId::try_from(id).ok())
+			.flatten()
+	}
+
+	fn not_found(&self) -> Response<Body> {
+		Response::builder()
+			.status(StatusCode::NOT_FOUND)
+			.body(Body::from("404 - Not found"))
+			.expect("Building this simple response doesn't fail. qed")
+	}
+}
 
 impl<C, LfsId> Service<Request<Body>> for HelloWorld<C, LfsId>
 where
@@ -29,19 +49,11 @@ where
 		// remove the leading slash
 		let (_, pure_path) = req.uri().path().split_at(1);
 		println!("asked for {:?}", pure_path);
-		if let Ok(base) = base64::decode_config(pure_path, base64::URL_SAFE) {
-			if let Ok(id) = LfsId::try_from(base) {
-				println!("valid ID found: {:?}", id);
-				if let Ok(data) = self.0.get(&id) {
-					return future::ok(Response::new(data.into()))
-				}
-			}
+		if let Some(data) = self.decode_to_key(&pure_path).map(|id| self.read_data(id)).flatten() {
+			return future::ok(Response::new(data.into()))
 		}
-		let resp = Response::builder()
-			.status(StatusCode::NOT_FOUND)
-			.body(Body::from("404 - Not found"))
-			.expect("Building this simple response doesn't fail. qed");
-        future::ok(resp)
+
+        future::ok(self.not_found())
     }
 }
 

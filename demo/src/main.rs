@@ -6,7 +6,6 @@ mod chain_spec;
 mod service;
 mod cli;
 mod command;
-mod http_proxy;
 
 pub use sc_cli::{error, VersionInfo};
 
