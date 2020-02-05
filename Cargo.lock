@@ -2021,6 +2021,7 @@ checksum = "b294d6fa9ee409a054354afc4352b0b9ef7ca222c69b8812cbea9e7d2bf3783f"
 name = "lfs-demo"
 version = "2.0.0"
 dependencies = [
+ "base64 0.11.0",
  "ctrlc",
  "futures 0.1.29",
  "futures 0.3.1",
@@ -2046,6 +2047,8 @@ dependencies = [
  "sp-finality-grandpa",
  "sp-inherents",
  "sp-io",
+ "sp-lfs-cache",
+ "sp-lfs-core",
  "sp-runtime",
  "sp-transaction-pool",
  "structopt",

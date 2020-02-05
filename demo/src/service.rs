@@ -177,8 +177,8 @@ pub fn new_full(
 		service.spawn_essential_task("aura", aura);
 	}
 
-	service.spawn_task("http-server", http_proxy::start_server());
-	
+	service.spawn_task("http-server", http_proxy::start_server(lfs.cache().clone()));
+
 	// if the node isn't actively participating in consensus then it doesn't
 	// need a keystore, regardless of which protocol we use below.
 	let keystore = if participates_in_consensus {

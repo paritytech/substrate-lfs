@@ -15,6 +15,12 @@ pub struct DefaultClient {
 	cache: cache::ClientCache,
 }
 
+impl DefaultClient {
+	/// get a reference to the inner client cache
+	pub fn cache(&self) -> &cache::ClientCache {
+		&self.cache
+	}
+}
 pub use sp_lfs_cache::lfs_cache_interface;
 
 pub struct LfsExtensionsFactory(cache::ClientCache);
