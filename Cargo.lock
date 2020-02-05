@@ -1669,6 +1669,7 @@ dependencies = [
  "httparse",
  "itoa",
  "log 0.4.8",
+ "net2",
  "pin-project",
  "time",
  "tokio 0.2.10",
@@ -2023,6 +2024,7 @@ dependencies = [
  "ctrlc",
  "futures 0.1.29",
  "futures 0.3.1",
+ "hyper 0.13.1",
  "jsonrpc-core",
  "lfs-demo-runtime",
  "log 0.4.8",
@@ -6319,6 +6321,7 @@ checksum = "c1fc73332507b971a5010664991a441b5ee0de92017f5a0e8b00fd684573045b"
 dependencies = [
  "bytes 0.5.4",
  "fnv",
+ "iovec",
  "lazy_static",
  "libc",
  "memchr",
@@ -6327,6 +6330,7 @@ dependencies = [
  "num_cpus",
  "pin-project-lite",
  "signal-hook-registry",
+ "slab",
  "winapi 0.3.8",
 ]
 

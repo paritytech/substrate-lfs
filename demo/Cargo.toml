@@ -45,6 +45,8 @@ sc-client = { version = "0.8.0", git = "https://github.com/paritytech/substrate"
 sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 
+hyper = "0.13"
+
 structopt = "0.3.8"
 jsonrpc-core =  "14.0.5"
 
