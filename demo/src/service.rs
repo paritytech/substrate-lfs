@@ -177,7 +177,7 @@ pub fn new_full(
 
 	service.spawn_task(
 		"http-server",
-		sc_lfs_http_server::start_server(lfs.cache().clone()),
+		sc_lfs_http_server::start_server(lfs.cache().clone(), ()),
 	);
 
 	// if the node isn't actively participating in consensus then it doesn't
