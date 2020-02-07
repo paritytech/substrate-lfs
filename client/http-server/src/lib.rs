@@ -6,10 +6,12 @@ use hyper::{http, Body, Request, Response, Server, StatusCode};
 use sp_lfs_cache::Cache;
 
 mod traits;
+mod helpers;
 #[cfg(feature = "user-data")]
-mod user_data;
+pub mod user_data;
 
 pub use traits::Resolver;
+pub use helpers::b64decode;
 
 fn not_found() -> Response<Body> {
 	Response::builder()
@@ -97,7 +99,7 @@ where
 pub async fn start_server<C, R, LfsId>(cache: C, resolver: R) -> ()
 where
 	C: Cache<LfsId> + Clone + 'static + Send,
-	R: Resolver<LfsId> + Clone + 'static + Send,
+	R: Resolver<LfsId> + 'static + Send,
 	LfsId: sp_lfs_core::LfsId + 'static,
 {
 	// This is our socket address...

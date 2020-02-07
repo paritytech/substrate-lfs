@@ -76,7 +76,7 @@ decl_module! {
 			Self::request_to_update(T::AccountId::default(), key, lfs_entry)
 		}
 
-		// callback called once the LFS is confirmed
+		// callback called once the LFS is confirmedLfsReference
 		fn data_changed(
 			origin,
 			who: T::AccountId,
