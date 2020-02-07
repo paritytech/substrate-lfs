@@ -20,7 +20,7 @@ features = ["default", "unstable"]
 
 [dependencies.sc-lfs-http-server]
 path = "../client/http-server"
-# features = ["default", "unstable"]
+features = ["default", "user-data"]
 
 
 [dependencies]

@@ -4889,10 +4889,17 @@ name = "sc-lfs-http-server"
 version = "0.1.0"
 dependencies = [
  "base64 0.11.0",
+ "frame-support",
+ "frame-system",
  "futures 0.3.1",
  "hyper 0.13.1",
+ "pallet-lfs-user-data",
+ "sc-client",
+ "sc-client-api",
+ "sp-core",
  "sp-lfs-cache",
  "sp-lfs-core",
+ "sp-runtime",
 ]
 
 [[package]]

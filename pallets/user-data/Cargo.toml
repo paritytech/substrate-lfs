@@ -25,6 +25,7 @@ std = [
     'codec/std',
     'system/std',
     'frame-support/std',
+    'pallet-lfs/std',
     'sp-std/std',
     'sp-lfs-core/std',
 ]

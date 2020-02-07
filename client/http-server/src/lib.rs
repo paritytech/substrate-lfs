@@ -3,33 +3,13 @@ use std::task::{Context, Poll};
 use std::marker::PhantomData;
 use hyper::service::Service;
 use hyper::{http, Body, Request, Response, Server, StatusCode};
-// use sc_client::Client;
 use sp_lfs_cache::Cache;
-use sp_lfs_core::LfsId;
 
-/// This can resolve a path into a set of
-/// LfsIds we'd like to check for
-pub trait Resolver<L: LfsId> {
-	type Iterator: core::iter::Iterator<Item = L>;
+mod traits;
+#[cfg(feature = "user-data")]
+mod user_data;
 
-	/// decode a base64 encoded string to Lfs
-	fn b64decode_key<'a>(&self, id: &'a str) -> Option<L> {
-		base64::decode_config(id, base64::URL_SAFE)
-			.ok()
-			.map(|id| L::try_from(id).ok())
-			.flatten()
-	}
-
-	fn resolve<'a>(&self, path: &'a str) -> Option<Self::Iterator>;
-}
-
-impl<L: LfsId> Resolver<L> for () {
-	type Iterator = std::vec::IntoIter<L>;
-	fn resolve<'a>(&self, path: &'a str) -> Option<Self::Iterator> {
-		let (_, pure_path) = path.split_at(1);
-		self.b64decode_key(pure_path).map(|id| vec![id].into_iter())
-	}
-}
+pub use traits::Resolver;
 
 fn not_found() -> Response<Body> {
 	Response::builder()
@@ -76,7 +56,7 @@ where
     }
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
-		if let Some(it) = self.resolver.resolve(req.uri().path()) {
+		if let Some(it) = self.resolver.resolve(req.uri().clone()) {
 			if let Some(data) = it.filter_map(|key| self.read_data(key)).next() {
 				return future::ok(Response::new(data.into()))
 			}
@@ -84,7 +64,7 @@ where
         future::ok(not_found())
     }
 }
-
+ 
 struct MakeSvc<C, R, L>(C, R, PhantomData<L>);
 impl<C, R, L> MakeSvc<C, R, L> {
 	fn new(cache: C, resolver: R) -> Self {
@@ -105,7 +85,7 @@ where
 
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         Ok(()).into()
-    }
+    } 
 
     fn call(&mut self, _: T) -> Self::Future {
         future::ok(LfsServer::new(self.0.clone(), self.1.clone()))
