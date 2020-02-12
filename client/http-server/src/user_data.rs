@@ -16,6 +16,7 @@ use crate::traits::Resolver;
 #[derive(Clone)]
 enum NextResolveStep {
 	UserData,
+	RootData,
 	Glob,
 	NotFound,
 	End,
@@ -24,7 +25,8 @@ enum NextResolveStep {
 impl NextResolveStep {
 	fn next(&self) -> Self {
 		match self {
-			NextResolveStep::UserData => NextResolveStep::Glob,
+			NextResolveStep::UserData => NextResolveStep::RootData,
+			NextResolveStep::RootData => NextResolveStep::Glob,
 			NextResolveStep::Glob => NextResolveStep::NotFound,
 			NextResolveStep::NotFound => NextResolveStep::End,
 			_ => NextResolveStep::End,
@@ -119,6 +121,12 @@ where
 							};
 							pallet::UserData::<T>::storage_double_map_final_key(&key, path)
 						})
+				}
+				NextResolveStep::RootData => {
+					Some(pallet::UserData::<T>::storage_double_map_final_key(
+						&self.root_key,
+						self.uri.path().split_at(1).1.as_bytes(), // drop leading `/`
+					))
 				}
 				NextResolveStep::Glob => Some(pallet::UserData::<T>::storage_double_map_final_key(
 					&self.root_key,

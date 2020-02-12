@@ -2043,6 +2043,7 @@ dependencies = [
  "lfs-demo-runtime",
  "log 0.4.8",
  "pallet-lfs-user-data",
+ "pallet-sudo",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "sc-lfs",

@@ -30,6 +30,7 @@ use lfs_demo_runtime::{
 	SignedPayload, UncheckedExtrinsic, VERSION,
 };
 use pallet_lfs_user_data as user_data;
+use pallet_sudo as sudo;
 use parity_scale_codec::{Decode, Encode};
 use sc_lfs::{lfs_id::LfsId, rpc::LfsClient};
 use sc_rpc::{author::AuthorClient, chain::ChainClient, state::StateClient};
@@ -85,25 +86,26 @@ fn main() {
 	env_logger::init();
 	let m = Opt::from_args();
 
+	let uri = m.server;
+	let key = m.key;
+	let root = m.root;
+
+	let files = {
+		let item = m.inputs;
+		let name = m
+			.name
+			.map(|s| s.as_str().to_owned())
+			.or_else(|| {
+				if let Some(Some(s)) = item.as_path().file_name().map(|s| s.to_str()) {
+					return Some(s.to_owned());
+				}
+				return None;
+			})
+			.expect("Not a proper file.");
+		vec![(name, item)]
+	};
+
 	rt::run(rt::lazy(move || {
-		let uri = m.server;
-		let key = m.key;
-
-		let files = {
-			let item = m.inputs;
-			let name = m
-				.name
-				.map(|s| s.as_str().to_owned())
-				.or_else(|| {
-					if let Some(Some(s)) = item.as_path().file_name().map(|s| s.to_str()) {
-						return Some(s.to_owned());
-					}
-					return None;
-				})
-				.expect("Not a proper file.");
-			vec![(name, item)]
-		};
-
 		http::connect(&uri)
 			.and_then(move |channel: RpcChannel| {
 				// let's upload the image via RPC
@@ -153,11 +155,6 @@ fn main() {
 				let mut running_nonce = nonce;
 				let mut calls = vec![];
 				for (name, remote_id) in to_set {
-					let call = user_data::Call::<Runtime>::update(
-						name.as_bytes().to_vec(),
-						remote_id.clone().into(),
-					);
-
 					let tip = 0;
 					let extra: SignedExtra = (
 						frame_system::CheckVersion::<Runtime>::new(),
@@ -168,7 +165,22 @@ fn main() {
 						pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 					);
 					let raw_payload = SignedPayload::from_raw(
-						call.into(),
+						if root {
+							sudo::Call::<Runtime>::sudo(Box::new(
+								user_data::Call::<Runtime>::root_update(
+									name.as_bytes().to_vec(),
+									remote_id.clone().into(),
+								)
+								.into(),
+							))
+							.into()
+						} else {
+							user_data::Call::<Runtime>::update(
+								name.as_bytes().to_vec(),
+								remote_id.clone().into(),
+							)
+							.into()
+						},
 						extra,
 						(
 							VERSION.spec_version,
@@ -198,7 +210,17 @@ fn main() {
 							println!("Error: {:?}", e);
 						})
 						.map(move |hash| {
-							println!("Submitted {:?} to: {:} in {:}", name, remote_id, hash);
+							if root {
+								println!(
+									"Submitted {:?} to root (as {}): {:} in {:}",
+									name, key, remote_id, hash
+								);
+							} else {
+								println!(
+									"Submitted {:?} for {:}: {:} in {:}",
+									name, key, remote_id, hash
+								);
+							}
 						});
 					calls.push(sub);
 					running_nonce += 1;
