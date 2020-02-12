@@ -22,7 +22,7 @@
 //! substrate node and use staticly typed RPC wrappers.
 
 use frame_support::storage::generator::StorageMap;
-use futures::Future;
+use futures::{future::join_all, Future};
 use hyper::rt;
 use jsonrpc_core_client::{transports::http, RpcChannel};
 use lfs_demo_runtime::{
@@ -42,25 +42,83 @@ use sp_runtime::{
 };
 use sp_storage::{StorageData, StorageKey};
 
+use std::path::PathBuf;
+use structopt::StructOpt;
+
+fn parse_key(s: &str) -> Result<AccountKeyring, String> {
+	match s {
+		"alice" | "Alice" => Ok(AccountKeyring::Alice),
+		"bob" | "Bob" => Ok(AccountKeyring::Bob),
+		"charlie" | "Charlie" => Ok(AccountKeyring::Charlie),
+		_ => Err(format!("Unknown key {:}", s)),
+	}
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(
+	name = "lfs-demo-rpc-client",
+	about = "Let's submit some user data to our chain"
+)]
+struct Opt {
+	/// RPC Server to use
+	#[structopt(long, default_value = "http://localhost:9933")]
+	server: String,
+
+	/// Use the this Key
+	#[structopt(short = "k", long = "key", parse(try_from_str = parse_key), default_value = "Alice")]
+	key: AccountKeyring,
+
+	/// Set as root, not for the given account
+	#[structopt(long)]
+	root: bool,
+
+	/// Store under `name` rather than the name of the file
+	#[structopt(long)]
+	name: Option<String>,
+
+	/// Input file or folder
+	#[structopt(name = "FILE")]
+	inputs: PathBuf,
+}
+
 fn main() {
 	env_logger::init();
+	let m = Opt::from_args();
 
-	rt::run(rt::lazy(|| {
-		let uri = "http://localhost:9933";
-		let key = AccountKeyring::Bob;
+	rt::run(rt::lazy(move || {
+		let uri = m.server;
+		let key = m.key;
 
-		http::connect(uri)
-			.and_then(|channel: RpcChannel| {
+		let files = {
+			let item = m.inputs;
+			let name = m
+				.name
+				.map(|s| s.as_str().to_owned())
+				.or_else(|| {
+					if let Some(Some(s)) = item.as_path().file_name().map(|s| s.to_str()) {
+						return Some(s.to_owned());
+					}
+					return None;
+				})
+				.expect("Not a proper file.");
+			vec![(name, item)]
+		};
+
+		http::connect(&uri)
+			.and_then(move |channel: RpcChannel| {
 				// let's upload the image via RPC
 				let client = LfsClient::<LfsId>::new(channel.clone());
-				client
-					.upload(include_bytes!("./avataaars.png").to_vec())
-					.map(|r| {
-						println!("File uploaded via RPC: {:?}", r);
-						(channel, r)
-					})
+				join_all(files.into_iter().map(move |(name, path)| {
+					client
+						.upload(std::fs::read(path.clone()).expect("Could not read file "))
+						.map(move |r| {
+							println!("File {:?} uploaded via RPC: {:}", path, r);
+							(name, r)
+						})
+				}))
+				.map(|v: Vec<(String, LfsId)>| (channel, v))
 			})
-			.map(move |(channel, remote_id)| {
+			.map(move |(channel, to_set)| {
 				// get the current nonce via RPC
 				let nonce_key = frame_system::AccountNonce::<Runtime>::storage_map_final_key(
 					key.clone().to_account_id(),
@@ -88,50 +146,67 @@ fn main() {
 					}
 				};
 
-				(channel, remote_id, genesis_hash, nonce)
+				(channel, to_set, genesis_hash, nonce)
 			})
-			.map(move |(channel, remote_id, genesis_hash, nonce)| {
+			.map(move |(channel, to_set, genesis_hash, nonce)| {
 				// submit the reference ID as our avatar entry
-				let call = user_data::Call::<Runtime>::update(b"avatar".to_vec(), remote_id.into());
+				let mut running_nonce = nonce;
+				let mut calls = vec![];
+				for (name, remote_id) in to_set {
+					let call = user_data::Call::<Runtime>::update(
+						name.as_bytes().to_vec(),
+						remote_id.clone().into(),
+					);
 
-				let tip = 0;
-				let extra: SignedExtra = (
-					frame_system::CheckVersion::<Runtime>::new(),
-					frame_system::CheckGenesis::<Runtime>::new(),
-					frame_system::CheckEra::<Runtime>::from(Era::Immortal),
-					frame_system::CheckNonce::<Runtime>::from(nonce),
-					frame_system::CheckWeight::<Runtime>::new(),
-					pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
-				);
-				let raw_payload = SignedPayload::from_raw(
-					call.into(),
-					extra,
-					(
-						VERSION.spec_version,
-						genesis_hash.clone(),
-						genesis_hash,
-						(),
-						(),
-						(),
-					), // additional extras
-				);
-				let signature = raw_payload.using_encoded(|payload| key.pair().sign(payload));
-				let (call, extra, _) = raw_payload.deconstruct();
-				let account = <Signature as Verify>::Signer::from(key.public()).into_account();
+					let tip = 0;
+					let extra: SignedExtra = (
+						frame_system::CheckVersion::<Runtime>::new(),
+						frame_system::CheckGenesis::<Runtime>::new(),
+						frame_system::CheckEra::<Runtime>::from(Era::Immortal),
+						frame_system::CheckNonce::<Runtime>::from(running_nonce),
+						frame_system::CheckWeight::<Runtime>::new(),
+						pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+					);
+					let raw_payload = SignedPayload::from_raw(
+						call.into(),
+						extra,
+						(
+							VERSION.spec_version,
+							genesis_hash.clone(),
+							genesis_hash,
+							(),
+							(),
+							(),
+						), // additional extras
+					);
+					let signature = raw_payload.using_encoded(|payload| key.pair().sign(payload));
+					let (call, extra, _) = raw_payload.deconstruct();
+					let account = <Signature as Verify>::Signer::from(key.public()).into_account();
 
-				let extrinsic =
-					UncheckedExtrinsic::new_signed(call, account.into(), signature.into(), extra);
+					let extrinsic = UncheckedExtrinsic::new_signed(
+						call,
+						account.into(),
+						signature.into(),
+						extra,
+					);
 
-				let client = AuthorClient::<Hash, Hash>::new(channel.clone());
-				let _ = client
-					.submit_extrinsic(extrinsic.encode().into())
-					.wait()
-					.map_err(|e| {
-						println!("Error: {:?}", e);
-					})
-					.map(|hash| {
-						println!("Avatar {:?} submitted: {:}", b"avatar", hash);
-					});
+					let client = AuthorClient::<Hash, Hash>::new(channel.clone());
+					let sub = client
+						.submit_extrinsic(extrinsic.encode().into())
+						.wait()
+						.map_err(|e| {
+							println!("Error: {:?}", e);
+						})
+						.map(move |hash| {
+							println!("Submitted {:?} to: {:} in {:}", name, remote_id, hash);
+						});
+					calls.push(sub);
+					running_nonce += 1;
+				}
+				join_all(calls)
+			})
+			.map(|_| {
+				println!("------ All submitted");
 			})
 			.map_err(|e| {
 				println!("Error: {:?}", e);
