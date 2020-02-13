@@ -79,13 +79,10 @@ where
 						.map_err(|_| {
 							println!("UserData Entry {:?} holds a non-key: {:?}.", key, d.0)
 						})
-						.ok()
-						.flatten()
-				})
-				.flatten()
+						.ok()?
+				})?
 			})
-			.ok()
-			.flatten()
+			.ok()?
 	}
 }
 
@@ -146,7 +143,7 @@ where
 
 			step = step.next();
 
-			if let Some(l) = key.map(|k| self.lookup(&StorageKey(k))).flatten() {
+			if let Some(l) = key.map(|k| self.lookup(&StorageKey(k)))? {
 				self.next = step;
 				return Some(l);
 			}
