@@ -56,6 +56,35 @@ fn parse_key(s: &str) -> Result<AccountKeyring, String> {
 }
 
 #[derive(Debug, StructOpt)]
+enum Commands {
+	/// Upload the given file and store it under the filename or given name
+	Set {
+		/// Store under `name` rather than the name of the file
+		#[structopt(long)]
+		name: Option<String>,
+
+		/// Input file to upload and set to
+		#[structopt(name = "FILE")]
+		path: PathBuf,
+	},
+
+	/// Upload all files and folders (recursively) in the folder
+	UploadDir {
+		/// Use this prefix rather than supplied path
+		#[structopt(long)]
+		prefix: Option<PathBuf>,
+
+		/// Replace the name of the `index.html` with ``
+		#[structopt(long)]
+		replace_index: bool,
+
+		/// Input folder
+		#[structopt(name = "DIRECTORY")]
+		root_dir: PathBuf,
+	},
+}
+
+#[derive(Debug, StructOpt)]
 #[structopt(
 	name = "lfs-demo-rpc-client",
 	about = "Let's submit some user data to our chain"
@@ -73,13 +102,8 @@ struct Opt {
 	#[structopt(long)]
 	root: bool,
 
-	/// Store under `name` rather than the name of the file
-	#[structopt(long)]
-	name: Option<String>,
-
-	/// Input file or folder
-	#[structopt(name = "FILE")]
-	inputs: PathBuf,
+	#[structopt(subcommand)]
+	cmd: Commands,
 }
 
 fn main() {
@@ -90,19 +114,60 @@ fn main() {
 	let key = m.key;
 	let root = m.root;
 
-	let files = {
-		let item = m.inputs;
-		let name = m
-			.name
-			.map(|s| s.as_str().to_owned())
-			.or_else(|| {
-				if let Some(Some(s)) = item.as_path().file_name().map(|s| s.to_str()) {
-					return Some(s.to_owned());
+	let files = match m.cmd {
+		Commands::Set { name, path } => vec![(
+			name.map(|s| s.as_str().to_owned())
+				.or_else(|| {
+					if let Some(Some(s)) = path.as_path().file_name().map(|s| s.to_str()) {
+						return Some(s.to_owned());
+					}
+					return None;
+				})
+				.expect("Not a proper file."),
+			path,
+		)],
+		Commands::UploadDir {
+			prefix,
+			replace_index,
+			root_dir,
+		} => walkdir::WalkDir::new(root_dir.clone())
+			.into_iter()
+			.filter_map(|e| e.ok())
+			.filter_map(move |entry| {
+				if entry.path().is_dir() {
+					return None;
+				} // nothing to be done for folders directly.
+				let path = entry.into_path();
+				// is always a sub part
+				let mut upload_key = path.strip_prefix(root_dir.clone()).map(|p| p.to_path_buf());
+
+				if let Some(ref p) = prefix {
+					upload_key = upload_key.map(|r| p.join(r))
 				}
-				return None;
+
+				if replace_index {
+					upload_key = upload_key.map(|local_name| {
+						if let Some("index.html") =
+							local_name.file_name().map(|s| s.to_str()).flatten()
+						{
+							local_name.with_file_name("")
+						} else {
+							local_name
+						}
+					})
+				}
+				Some((
+					upload_key
+						.map(|u| {
+							u.to_str()
+								.map(|s| String::from(s))
+								.expect("Can't read file name")
+						})
+						.expect("Key generation failed"),
+					path,
+				))
 			})
-			.expect("Not a proper file.");
-		vec![(name, item)]
+			.collect(),
 	};
 
 	rt::run(rt::lazy(move || {
@@ -152,20 +217,10 @@ fn main() {
 			})
 			.map(move |(channel, to_set, genesis_hash, nonce)| {
 				// submit the reference ID as our avatar entry
-				let mut running_nonce = nonce;
-				let mut calls = vec![];
-				for (name, remote_id) in to_set {
-					let tip = 0;
-					let extra: SignedExtra = (
-						frame_system::CheckVersion::<Runtime>::new(),
-						frame_system::CheckGenesis::<Runtime>::new(),
-						frame_system::CheckEra::<Runtime>::from(Era::Immortal),
-						frame_system::CheckNonce::<Runtime>::from(running_nonce),
-						frame_system::CheckWeight::<Runtime>::new(),
-						pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
-					);
-					let raw_payload = SignedPayload::from_raw(
-						if root {
+				let calls = if root {
+					to_set
+						.iter()
+						.map(|(name, remote_id)| {
 							sudo::Call::<Runtime>::sudo(Box::new(
 								user_data::Call::<Runtime>::root_update(
 									name.as_bytes().to_vec(),
@@ -174,58 +229,57 @@ fn main() {
 								.into(),
 							))
 							.into()
-						} else {
+						})
+						.collect()
+				} else {
+					to_set
+						.iter()
+						.map(|(name, remote_id)| {
 							user_data::Call::<Runtime>::update(
 								name.as_bytes().to_vec(),
 								remote_id.clone().into(),
 							)
 							.into()
-						},
-						extra,
-						(
-							VERSION.spec_version,
-							genesis_hash.clone(),
-							genesis_hash,
-							(),
-							(),
-							(),
-						), // additional extras
-					);
-					let signature = raw_payload.using_encoded(|payload| key.pair().sign(payload));
-					let (call, extra, _) = raw_payload.deconstruct();
-					let account = <Signature as Verify>::Signer::from(key.public()).into_account();
-
-					let extrinsic = UncheckedExtrinsic::new_signed(
-						call,
-						account.into(),
-						signature.into(),
-						extra,
-					);
-
-					let client = AuthorClient::<Hash, Hash>::new(channel.clone());
-					let sub = client
-						.submit_extrinsic(extrinsic.encode().into())
-						.wait()
-						.map_err(|e| {
-							println!("Error: {:?}", e);
 						})
-						.map(move |hash| {
-							if root {
-								println!(
-									"Submitted {:?} to root (as {}): {:} in {:}",
-									name, key, remote_id, hash
-								);
-							} else {
-								println!(
-									"Submitted {:?} for {:}: {:} in {:}",
-									name, key, remote_id, hash
-								);
-							}
-						});
-					calls.push(sub);
-					running_nonce += 1;
-				}
-				join_all(calls)
+						.collect()
+				};
+
+				let tip = 0;
+				let extra: SignedExtra = (
+					frame_system::CheckVersion::<Runtime>::new(),
+					frame_system::CheckGenesis::<Runtime>::new(),
+					frame_system::CheckEra::<Runtime>::from(Era::Immortal),
+					frame_system::CheckNonce::<Runtime>::from(nonce),
+					frame_system::CheckWeight::<Runtime>::new(),
+					pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+				);
+				let raw_payload = SignedPayload::from_raw(
+					pallet_utility::Call::<Runtime>::batch(calls).into(),
+					extra,
+					(
+						VERSION.spec_version,
+						genesis_hash.clone(),
+						genesis_hash,
+						(),
+						(),
+						(),
+					), // additional extras
+				);
+				let signature = raw_payload.using_encoded(|payload| key.pair().sign(payload));
+				let (call, extra, _) = raw_payload.deconstruct();
+				let account = <Signature as Verify>::Signer::from(key.public()).into_account();
+
+				let extrinsic =
+					UncheckedExtrinsic::new_signed(call, account.into(), signature.into(), extra);
+
+				let client = AuthorClient::<Hash, Hash>::new(channel.clone());
+				client
+					.submit_extrinsic(extrinsic.encode().into())
+					.wait()
+					.map_err(|e| {
+						println!("Error: {:?}", e);
+					})
+					.map(|hash| println!("Submitted in  {:}", hash))
 			})
 			.map(|_| {
 				println!("------ All submitted");
