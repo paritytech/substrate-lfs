@@ -131,6 +131,7 @@ fn main() {
 			replace_index,
 			root_dir,
 		} => walkdir::WalkDir::new(root_dir.clone())
+			.contents_first(true)
 			.into_iter()
 			.filter_map(|e| e.ok())
 			.filter_map(move |entry| {
@@ -221,6 +222,7 @@ fn main() {
 					to_set
 						.iter()
 						.map(|(name, remote_id)| {
+							println!("Setting (root) {:} to {:}", name, remote_id);
 							sudo::Call::<Runtime>::sudo(Box::new(
 								user_data::Call::<Runtime>::root_update(
 									name.as_bytes().to_vec(),
@@ -235,6 +237,7 @@ fn main() {
 					to_set
 						.iter()
 						.map(|(name, remote_id)| {
+							println!("Setting ({}) {:} to {:}", key, name, remote_id);
 							user_data::Call::<Runtime>::update(
 								name.as_bytes().to_vec(),
 								remote_id.clone().into(),

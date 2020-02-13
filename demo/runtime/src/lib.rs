@@ -265,7 +265,10 @@ impl utility::Trait for Runtime {
 impl pallet_lfs_user_data::Trait for Runtime {
 	type Event = Event;
 	type Callback = Call;
-	type KeyGuard = pallet_lfs_user_data::guard::DefaultUserKeys;
+	type KeyGuard = (
+		pallet_lfs_user_data::guard::DefaultUserKeys,
+		pallet_lfs_user_data::guard::Homepage,
+	);
 }
 
 type LfsTransactionSubmitter = TransactionSubmitter<LfsAppKeyPublic, Runtime, UncheckedExtrinsic>;

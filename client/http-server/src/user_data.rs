@@ -117,7 +117,7 @@ where
 							// fallback is to check for `/`
 							let path = match splitter.next() {
 								Some(s) if s.len() > 0 => s.as_bytes().to_vec(),
-								_ => b"/".to_vec(),
+								_ => b"".to_vec(),
 							};
 							pallet::UserData::<T>::storage_double_map_final_key(&key, path)
 						})

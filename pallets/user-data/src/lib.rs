@@ -21,6 +21,27 @@ pub mod guard {
 	}
 	impl KeyGuardian for () {}
 
+	impl<T, P> KeyGuardian for (T, P)
+	where
+		T: KeyGuardian,
+		P: KeyGuardian,
+	{
+		fn is_allowed(key: &[u8]) -> bool {
+			T::is_allowed(key) || P::is_allowed(key)
+		}
+	}
+
+	impl<A, T, P> KeyGuardian for (A, T, P)
+	where
+		A: KeyGuardian,
+		T: KeyGuardian,
+		P: KeyGuardian,
+	{
+		fn is_allowed(key: &[u8]) -> bool {
+			A::is_allowed(key) || T::is_allowed(key) || P::is_allowed(key)
+		}
+	}
+
 	pub struct DefaultUserKeys;
 	impl KeyGuardian for DefaultUserKeys {
 		fn is_allowed(key: &[u8]) -> bool {
@@ -28,6 +49,44 @@ pub mod guard {
 				b"settings" | b"avatar" | b"profile" | b"colors" | b"backdrop" => true,
 				_ => false,
 			}
+		}
+	}
+
+	pub struct Homepage;
+	impl KeyGuardian for Homepage {
+		fn is_allowed(key: &[u8]) -> bool {
+			if key == b"" {
+				return true
+			}
+			if key.starts_with(b"/") {
+				return false;
+			}
+
+			let mut last_entry = Default::default();
+
+			for entry in key.split(|c| c == &b"/"[0]) {
+				if *entry == b".."[..] {
+					// we do not accept this
+					return false;
+				}
+				last_entry = entry;
+			}
+
+			if key.ends_with(b"/") {
+				return true;
+			}
+
+			if let Some(ext) = last_entry.rsplitn(2, |c| c == &b"."[0]).next() {
+				match ext {
+					b"css" | b"js" | b"html" // regular web stuff
+					| b"png" | b"jpg" | b"svg" | b"gif" // allowed images
+					| b"txt" | b"rtf" | b"md" | b"adoc" // common text formats
+					| b"eot" | b"ttf" | b"woff" | b"woff2" // webfonts
+					 => return true, 
+					_ => {}
+				}
+			}
+			return false;
 		}
 	}
 }
