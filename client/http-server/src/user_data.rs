@@ -104,8 +104,7 @@ where
 					let mut splitter = self.uri.path().splitn(3, "/").filter(|s| s.len() > 0);
 					let user_key = splitter.next();
 					user_key
-						.map(|mut u| T::AccountId::from_string(&mut u).ok())
-						.flatten()
+						.and_then(|mut u| T::AccountId::from_string(&mut u).ok())
 						.map(|key| {
 							pallet::UserData::<T>::storage_double_map_final_key(
 								&key,
@@ -139,7 +138,7 @@ where
 			};
 
 			self.step = self.step.next();
-			if let Some(l) = key.map(|k| self.lookup(&StorageKey(k))).flatten() {
+			if let Some(l) = key.and_then(|k| self.lookup(&StorageKey(k))) {
 				return Some(l);
 			}
 		}

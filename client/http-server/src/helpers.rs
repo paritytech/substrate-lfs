@@ -5,8 +5,7 @@ use codec::{Decode, Encode};
 pub fn b64decode<'a, D: Decode>(input: &'a [u8]) -> Option<D> {
 	base64::decode_config(input, base64::URL_SAFE)
 		.ok()
-		.map(|input| D::decode(&mut input.as_ref()).ok())
-		.flatten()
+		.and_then(|input| D::decode(&mut input.as_ref()).ok())
 }
 
 /// helper to encode to a base64

@@ -60,8 +60,7 @@ where
 					== req
 						.headers()
 						.get(header::IF_NONE_MATCH)
-						.map(|l| b64decode::<LfsId>(l.as_bytes()))
-						.flatten()
+						.and_then(|l| b64decode::<LfsId>(l.as_bytes()))
 				{
 					return future::ok(
 						Response::builder()

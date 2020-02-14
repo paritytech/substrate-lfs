@@ -149,7 +149,7 @@ fn main() {
 				if replace_index {
 					upload_key = upload_key.map(|local_name| {
 						if let Some("index.html") =
-							local_name.file_name().map(|s| s.to_str()).flatten()
+							local_name.file_name().and_then(|s| s.to_str())
 						{
 							local_name.with_file_name("")
 						} else {
