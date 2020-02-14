@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use crate::traits::Resolver;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum NextResolveStep {
 	UserData,
 	RootData,
@@ -29,7 +29,7 @@ impl NextResolveStep {
 			NextResolveStep::RootData => NextResolveStep::Glob,
 			NextResolveStep::Glob => NextResolveStep::NotFound,
 			NextResolveStep::NotFound => NextResolveStep::End,
-			_ => NextResolveStep::End,
+			NextResolveStep::End => NextResolveStep::End,
 		}
 	}
 }
@@ -40,7 +40,7 @@ pub struct UserDataResolveIterator<L, B, E, Block: BlockT, RA, T: pallet::Trait>
 	root_key: T::AccountId,
 	_marker: PhantomData<(T, L)>,
 	uri: Uri,
-	next: NextResolveStep,
+	step: NextResolveStep,
 }
 
 impl<L, B, E, Block, RA, T> UserDataResolveIterator<L, B, E, Block, RA, T>
@@ -62,7 +62,7 @@ where
 			best_block,
 			root_key,
 			uri,
-			next: NextResolveStep::UserData,
+			step: NextResolveStep::UserData,
 			_marker: Default::default(),
 		}
 	}
@@ -98,31 +98,28 @@ where
 	type Item = L;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let mut step = self.next.clone();
-
 		loop {
-			let key = match step {
+			let key = match self.step {
 				NextResolveStep::UserData => {
-					let mut splitter = self.uri.path().splitn(3, "/");
-					let _ = splitter.next(); // it starts with a slash, drop it;
+					let mut splitter = self.uri.path().splitn(3, "/").filter(|s| s.len() > 0);
 					let user_key = splitter.next();
 					user_key
 						.map(|mut u| T::AccountId::from_string(&mut u).ok())
 						.flatten()
 						.map(|key| {
-							// the rest is the key we want to look up
-							// fallback is to check for `/`
-							let path = match splitter.next() {
-								Some(s) if s.len() > 0 => s.as_bytes().to_vec(),
-								_ => b"".to_vec(),
-							};
-							pallet::UserData::<T>::storage_double_map_final_key(&key, path)
+							pallet::UserData::<T>::storage_double_map_final_key(
+								&key,
+								// the rest is the key we want to look up
+								// fallback is to check for `""`
+								splitter.next().unwrap_or("").as_bytes().to_vec(),
+							)
 						})
 				}
 				NextResolveStep::RootData => {
+					let path = self.uri.path().split_at(1).1;
 					Some(pallet::UserData::<T>::storage_double_map_final_key(
 						&self.root_key,
-						self.uri.path().split_at(1).1.as_bytes(), // drop leading `/`
+						path.as_bytes(), // drop leading `/`
 					))
 				}
 				NextResolveStep::Glob => Some(pallet::UserData::<T>::storage_double_map_final_key(
@@ -141,10 +138,8 @@ where
 				}
 			};
 
-			step = step.next();
-
-			if let Some(l) = key.map(|k| self.lookup(&StorageKey(k)))? {
-				self.next = step;
+			self.step = self.step.next();
+			if let Some(l) = key.map(|k| self.lookup(&StorageKey(k))).flatten() {
 				return Some(l);
 			}
 		}

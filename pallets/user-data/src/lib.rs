@@ -56,7 +56,7 @@ pub mod guard {
 	impl KeyGuardian for Homepage {
 		fn is_allowed(key: &[u8]) -> bool {
 			if key == b"" {
-				return true
+				return true;
 			}
 			if key.starts_with(b"/") {
 				return false;

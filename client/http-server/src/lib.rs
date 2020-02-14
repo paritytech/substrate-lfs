@@ -2,7 +2,7 @@ use futures::future;
 use std::task::{Context, Poll};
 use std::marker::PhantomData;
 use hyper::service::Service;
-use hyper::{http, Body, Request, Response, Server, StatusCode};
+use hyper::{http, header, Body, Request, Response, Server, StatusCode};
 use sp_lfs_cache::Cache;
 
 mod traits;
@@ -11,7 +11,7 @@ mod helpers;
 pub mod user_data;
 
 pub use traits::Resolver;
-pub use helpers::b64decode;
+pub use helpers::{b64decode, b64encode};
 
 fn not_found() -> Response<Body> {
 	Response::builder()
@@ -32,17 +32,6 @@ impl<C, R, LfsId> LfsServer<C, R, LfsId> {
 	}
 }
 
-impl<C, R, LfsId> LfsServer<C, R, LfsId>
-where
-	C: Cache<LfsId>,
-	R: Resolver<LfsId>,
-	LfsId: sp_lfs_core::LfsId,
-{
-	fn read_data(&self, key: LfsId) -> Option<Vec<u8>> {
-		self.cache.get(&key).ok()
-	}
-}
-
 impl<C, R, LfsId> Service<Request<Body>> for LfsServer<C, R, LfsId>
 where
 	C: Cache<LfsId>,
@@ -59,8 +48,29 @@ where
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
 		if let Some(it) = self.resolver.resolve(req.uri().clone()) {
-			if let Some(data) = it.filter_map(|key| self.read_data(key)).next() {
-				return future::ok(Response::new(data.into()))
+			if let Some(key) = it.filter(|key| self.cache.exists(key).unwrap_or(false)).next() {
+				if Some(key.clone()) == req.headers().get(header::IF_NONE_MATCH)
+					.map(|l| b64decode::<LfsId>(l.as_bytes())).flatten()
+				{
+					return future::ok(
+						Response::builder()
+							.status(StatusCode::NOT_MODIFIED)
+							.body(Body::empty())
+							.expect("Empty doesn't fail")
+						)
+				}
+				return future::ok(match self.cache.get(&key) {
+					Ok(data) => Response::builder()
+						.status(StatusCode::OK)
+						.header(header::ETAG, b64encode(key))
+						.body(data.into())
+						.expect("Building this simple response doesn't fail. qed"),
+					Err(_) => Response::builder()
+						.status(StatusCode::INTERNAL_SERVER_ERROR)
+						.body(Body::from(format!("Internal Server error key {:?} found, but couldn't be read.", key)))
+						.expect("Building this simple response doesn't fail. qed")
+					}
+				)
 			}
 		}
         future::ok(not_found())

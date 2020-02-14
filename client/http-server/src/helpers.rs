@@ -1,10 +1,15 @@
 use base64;
-use codec::Decode;
+use codec::{Decode, Encode};
 
 /// helper to decode a base64 encoded string to Lfs
-pub fn b64decode<'a, D: Decode>(id: &'a str) -> Option<D> {
-	base64::decode_config(id, base64::URL_SAFE)
+pub fn b64decode<'a, D: Decode>(input: &'a [u8]) -> Option<D> {
+	base64::decode_config(input, base64::URL_SAFE)
 		.ok()
-		.map(|id| D::decode(&mut id.as_ref()).ok())
+		.map(|input| D::decode(&mut input.as_ref()).ok())
 		.flatten()
+}
+
+/// helper to encode to a base64
+pub fn b64encode<'a, E: Encode>(input: E) -> String {
+	base64::encode_config(&input.encode(), base64::URL_SAFE)
 }

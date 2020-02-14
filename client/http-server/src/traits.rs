@@ -13,11 +13,11 @@ pub trait Resolver<L: LfsId>: Clone {
 }
 
 /// Default implementation just takes the entire path,
-/// excluding the starting slash, and attempts to decode that
+/// excluding the starting slash, and attempts to base64 decode that
 impl<L: LfsId> Resolver<L> for () {
 	type Iterator = std::vec::IntoIter<L>;
 	fn resolve(&self, uri: Uri) -> Option<Self::Iterator> {
 		let (_, pure_path) = uri.path().split_at(1);
-		b64decode::<L>(pure_path).map(|id| vec![id].into_iter())
+		b64decode::<L>(pure_path.as_bytes()).map(|id| vec![id].into_iter())
 	}
 }
