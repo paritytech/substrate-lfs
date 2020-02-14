@@ -82,7 +82,7 @@ pub mod guard {
 					| b"png" | b"jpg" | b"svg" | b"gif" // allowed images
 					| b"txt" | b"rtf" | b"md" | b"adoc" // common text formats
 					| b"eot" | b"ttf" | b"woff" | b"woff2" // webfonts
-					 => return true, 
+					=> return true,
 					_ => {}
 				}
 			}

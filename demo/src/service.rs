@@ -175,7 +175,13 @@ pub fn new_full(
 		service.spawn_essential_task("aura", aura);
 	}
 
-	let user_data_resolver = sc_lfs_http_server::user_data::UserDataResolver::<_,_,_,_, lfs_demo_runtime::Runtime>::new(service.client());
+	let user_data_resolver = sc_lfs_http_server::user_data::UserDataResolver::<
+		_,
+		_,
+		_,
+		_,
+		lfs_demo_runtime::Runtime,
+	>::new(service.client());
 
 	service.spawn_task(
 		"http-server",
