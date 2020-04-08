@@ -1,12 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Codec, Decode, Encode};
-use rstd::prelude::*;
 use sp_runtime::app_crypto::KeyTypeId;
 use sp_runtime::{
 	traits::{Dispatchable, StaticLookup},
 	DispatchError,
 };
+use sp_std::prelude::*;
 use support::{
 	decl_event, decl_module, decl_storage, dispatch::DispatchResult, Parameter, StorageValue,
 };
@@ -85,7 +85,7 @@ decl_storage! {
 		/// our record of offchain calls triggered in this block
 		OcwEvents get(fn ocw_events): Vec<LfsOffchainEvent>;
 		/// The current set of keys that may submit pongs
-		Authorities get(fn authorities) config(): Vec<T::AccountId>;
+		Authorities get(fn authorities) config(authorities): Vec<T::AccountId>;
 		/// The specific LFS entries and states
 		Entries: map hasher(blake2_256) LfsReference => Option<LfsEntryState<T>>;
 	}

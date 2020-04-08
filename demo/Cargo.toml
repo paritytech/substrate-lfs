@@ -18,6 +18,11 @@ path = "./runtime"
 path = "../client"
 features = ["default", "unstable"]
 
+[dependencies.sc-lfs-http-server]
+path = "../client/http-server"
+features = ["default", "user-data"]
+
+
 [dependencies]
 futures = "0.3.1"
 futures01 = { package = "futures", version = "0.1.29" }

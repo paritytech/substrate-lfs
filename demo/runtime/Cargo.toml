@@ -5,7 +5,11 @@ authors = ["Anonymous"]
 edition = "2018"
 
 [dependencies.pallet-lfs]
-path = "../../pallet"
+path = "../../pallets"
+default-features = false
+
+[dependencies.pallet-lfs-user-data]
+path = "../../pallets/user-data"
 default-features = false
 
 [dependencies.sp-lfs-core]
@@ -23,6 +27,7 @@ sudo = { version = "2.0.0", default-features = false, package = "pallet-sudo", g
 system = { version = "2.0.0", default-features = false, package = "frame-system", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 timestamp = { version = "2.0.0", default-features = false, package = "pallet-timestamp", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 transaction-payment = { version = "2.0.0", default-features = false, package = "pallet-transaction-payment", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
+utility = { package = "pallet-utility", default-features = false, version = "2.0.0", git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 
 codec = { package = "parity-scale-codec", version = "1.0.0", default-features = false, features = ["derive"] }
 frame-executive = { version = "2.0.0", default-features = false, git = "https://github.com/paritytech/substrate", rev = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
@@ -56,6 +61,7 @@ std = [
 	"indices/std",
 	"randomness-collective-flip/std",
 	"safe-mix/std",
+	"utility/std",
 	"serde",
 	"sp-api/std",
 	"sp-block-builder/std",
@@ -74,4 +80,5 @@ std = [
 	"timestamp/std",
 	"transaction-payment/std",
 	"pallet-lfs/std",
+	"pallet-lfs-user-data/std",
 ]

@@ -19,6 +19,7 @@ features = ["std"]
 [dependencies]
 libp2p = "0.13.1"
 parking_lot = "0.10.0"
+base64 = "0.11"
 codec = { default-features = false, package = "parity-scale-codec", version = "1.1.2" }
 sc-client-api = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }
 sp-runtime-interface = { default-features = false, git = "https://github.com/paritytech/substrate", rev  = "e65957e5efceea82d88f8b4e1248171eb3c2167e" }

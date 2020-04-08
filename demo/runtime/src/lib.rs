@@ -68,8 +68,6 @@ pub type LfsAppKeyPublic = pallet_lfs::sr25519::Public;
 #[cfg(feature = "std")]
 pub type LfsAppKeyPair = pallet_lfs::sr25519::Pair;
 
-pub mod avatars;
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -112,6 +110,10 @@ pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
+
+pub const MILLICENTS: Balance = 1_000_000_000;
+pub const CENTS: Balance = 1_000 * MILLICENTS; // assume this is worth about a cent.
+pub const DOLLARS: Balance = 100 * CENTS;
 
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -241,10 +243,32 @@ impl sudo::Trait for Runtime {
 	type Proposal = Call;
 }
 
+parameter_types! {
+	// One storage item; value is size 4+4+16+32 bytes = 56 bytes.
+	pub const MultisigDepositBase: Balance = 30 * CENTS;
+	// Additional storage item size of 32 bytes.
+	pub const MultisigDepositFactor: Balance = 5 * CENTS;
+	pub const MaxSignatories: u16 = 100;
+}
+
+/// So we can dispatch multiple calls in one extrinsic
+impl utility::Trait for Runtime {
+	type Event = Event;
+	type Call = Call;
+	type Currency = Balances;
+	type MultisigDepositBase = MultisigDepositBase;
+	type MultisigDepositFactor = MultisigDepositFactor;
+	type MaxSignatories = MaxSignatories;
+}
+
 /// Used for the module template in `./template.rs`
-impl avatars::Trait for Runtime {
+impl pallet_lfs_user_data::Trait for Runtime {
 	type Event = Event;
 	type Callback = Call;
+	type KeyGuard = (
+		pallet_lfs_user_data::guard::DefaultUserKeys,
+		pallet_lfs_user_data::guard::Homepage,
+	);
 }
 
 type LfsTransactionSubmitter = TransactionSubmitter<LfsAppKeyPublic, Runtime, UncheckedExtrinsic>;
@@ -264,6 +288,7 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
 		System: system::{Module, Call, Storage, Config, Event},
+		Utility: utility::{Module, Call, Storage, Event<T>},
 		Timestamp: timestamp::{Module, Call, Storage, Inherent},
 		Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
 		Grandpa: grandpa::{Module, Call, Storage, Config, Event},
@@ -271,8 +296,8 @@ construct_runtime!(
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
-		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>},
-		Avatars: avatars::{Module, Call, Storage, Event<T>},
+		Lfs: pallet_lfs::{Module, Call, Storage, Event<T>, Config<T>},
+		UserData: pallet_lfs_user_data::{Module, Call, Storage, Event<T>},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 	}
 );

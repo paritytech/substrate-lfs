@@ -54,6 +54,12 @@ impl LfsId {
 	}
 }
 
+impl std::fmt::Display for LfsId {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "LFSid<{}>", base64::encode(&self.encode()))
+	}
+}
+
 impl sp_runtime_interface::pass_by::PassBy for LfsId {
 	type PassBy = sp_runtime_interface::pass_by::Codec<Self>;
 }

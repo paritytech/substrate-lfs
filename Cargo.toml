@@ -6,10 +6,13 @@ members = [
 
     # client
     "client/simple-cache",
+    "client/http-server",
     "client",
 
-    # frame pallet
-    "pallet",
+    # frame core pallet
+    "pallets",
+    # custom frame palletts
+    "pallets/user-data",
 
     # demo implementation
     "demo/runtime",

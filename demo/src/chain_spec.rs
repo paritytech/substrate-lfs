@@ -1,7 +1,7 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use lfs_demo_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, Signature,
-	SudoConfig, SystemConfig, WASM_BINARY,
+	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, IndicesConfig, LfsConfig,
+	Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sc_service;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -149,6 +149,9 @@ fn testnet_genesis(
 				.iter()
 				.map(|x| (x.1.clone(), 1))
 				.collect(),
+		}),
+		pallet_lfs: Some(LfsConfig {
+			authorities: endowed_accounts.clone(),
 		}),
 	}
 }
